@@ -1,0 +1,44 @@
+[
+  {
+    "userName": "superAdmin",
+    "email": "superAdmin@mail.com",
+    "password": "superAdminPass",
+    "role": "SUPER ADMIN"
+  },
+  {
+    "userName": "owner1Boss",
+    "email": "owner1@mail.com",
+    "password": "owner1Pass",
+    "role": "OWNER"
+  },
+  {
+    "userName": "admin1",
+    "email": "admin1@mail.com",
+    "password": "admin1Pass",
+    "role": "ADMIN"
+  },
+  {
+    "userName": "manager1",
+    "email": "manager1@mail.com",
+    "password": "manager1Pass",
+    "role": "MANAGER"
+  },
+  {
+    "userName": "manager2",
+    "email": "manager2@mail.com",
+    "password": "manager2Pass",
+    "role": "MANAGER"
+  },
+  {
+    "userName": "employee1",
+    "email": "employee1@mail.com",
+    "password": "employee1Pass",
+    "role": "EMPLOYEE"
+  },
+  {
+    "userName": "employee2",
+    "email": "employee2@mail.com",
+    "password": "employee2Pass",
+    "role": "EMPLOYEE"
+  }
+]

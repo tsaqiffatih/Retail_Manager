@@ -1,0 +1,23 @@
+[
+  {
+    "ownerUsername" : "owner1Boss",
+    "name": "Boss Electronic",
+    "location": "Bali",
+    "category": "Electronic",
+    "OwnerId": 2
+  },
+  {
+    "ownerUsername" : "owner1Boss",
+    "name": "Boss Toy",
+    "location": "Jakarta",
+    "category": "Toy",
+    "OwnerId": 2
+  },
+  {
+    "ownerUsername" : "owner1Boss",
+    "name": "Boss Gardening",
+    "location": "Bandung",
+    "category": "Gardening",
+    "OwnerId": 2
+  }
+]

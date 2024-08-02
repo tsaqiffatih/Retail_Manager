@@ -1,0 +1,62 @@
+[
+  {
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "dateOfBirth": "1995-05-05",
+    "contact": "987654321",
+    "education": "Master",
+    "address": "Jl. Jakarta No. 2",
+    "position": "Sales Assistant",
+    "salary": 3000000,
+    "UserId": 3,
+    "StoreId": 2
+  },
+  {
+    "firstName": "Mike",
+    "lastName": "Johnson",
+    "dateOfBirth": "1993-08-08",
+    "contact": "5555555555",
+    "education": "Bachelor",
+    "address": "Jl. Bandung No. 3",
+    "position": "Cashier",
+    "salary": 2500000,
+    "UserId": 4,
+    "StoreId": 3
+  },
+  {
+    "firstName": "John",
+    "lastName": "Doe",
+    "dateOfBirth": "1990-01-01",
+    "contact": "123456789",
+    "education": "Bachelor",
+    "address": "Jl. Bali No. 1",
+    "position": "Sales Admin",
+    "salary": 5000000,
+    "UserId": 5,
+    "StoreId": 1
+  },
+  {
+    "firstName": "Emily",
+    "lastName": "Brown",
+    "dateOfBirth": "1992-03-03",
+    "contact": "7777777777",
+    "education": "Bachelor",
+    "address": "Jl. Bali No. 4",
+    "position": "Cashier",
+    "salary": 2500000,
+    "UserId": 6,
+    "StoreId": 1
+  },
+  {
+    "firstName": "Luthfi",
+    "lastName": "Jamil",
+    "dateOfBirth": "1992-03-03",
+    "contact": "7777777777",
+    "education": "Bachelor",
+    "address": "Jl. Bali No. 4",
+    "position": "Cashier",
+    "salary": 2500000,
+    "UserId": 7,
+    "StoreId": 1
+  }
+]
