@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 
-interface CustomError extends Error {
+export interface CustomError extends Error {
     param?: string;
     errors?: { message: string }[];
     name:string
@@ -51,7 +51,10 @@ const errorHandler = (err: CustomError, req: Request, res: Response, next: NextF
     } else if (name === 'Unauthorized Delete') {
         status = 400;
         message = `You do not have permission to delete this ${param}`;
-    } else {
+    } else if (name === 'WeakPasswordError') {
+        status = 400;
+        message = err.message;
+      } else {
         console.log(err);
         
     }

@@ -1,5 +1,11 @@
 import { Sequelize } from 'sequelize-typescript';
 import dotenv from 'dotenv';
+import User from '../models/user';
+import Employee from '../models/employee';
+import Store from '../models/store';
+import Payroll from '../models/payroll';
+import Attendance from '../models/attendance';
+import AuditLog from '../models/auditlog';
 
 dotenv.config();
 
@@ -49,4 +55,7 @@ const sequelizeConnection = new Sequelize(config.database, config.username, conf
     dialect: "postgres",
 });
 
+sequelizeConnection.addModels([User,Store,Employee,Payroll,Attendance,AuditLog])
+
 export default sequelizeConnection;
+

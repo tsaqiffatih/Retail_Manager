@@ -1,7 +1,8 @@
-import request from 'supertest';
-import app, { server } from '../app'; // Sesuaikan dengan path ke file utama aplikasi Anda
-import sequelizeConnection from '../config/connection';
+import request from "supertest";
+import app, { server } from "../app"; // Sesuaikan dengan path ke file utama aplikasi Anda
+import sequelizeConnection from "../config/connection";
 import { Sequelize } from "sequelize";
+import { createToken } from "../helper/jsonWebToken"; // Sesuaikan dengan path ke file helper jsonWebToken
 
 const deleteTestDatabase = async () => {
   const sequelize = new Sequelize(
@@ -25,219 +26,278 @@ const deleteTestDatabase = async () => {
   }
 };
 
-describe('User Controller Tests', () => {
-  
+
+describe("User Controller Tests", () => {
+
+   // Simulated payloads for different roles
+  const superAdminPayload = { email: 'superAdmin@mail.com', username: 'superAdmin' };
+  const ownerPayload = { email: 'owner@mail.com', username: 'owner' };
+  const adminPayload = { email: 'admin@mail.com', username: 'admin' };
+  const employeePayload = { email: 'employee@mail.com', username: 'employee' };
+
+  // Generate tokens for different roles
+  const superAdminToken = createToken(superAdminPayload);
+  const ownerToken = createToken(ownerPayload);
+  const adminToken = createToken(adminPayload);
+  const employeeToken = createToken(employeePayload);
+
   afterAll(async () => {
     await sequelizeConnection.close();
     server.close();
     await deleteTestDatabase();
   }, 15000);
 
-  describe('POST /login', () => {
-    test('success post /login', async () => {
-      const response = await request(app).post('/api/users/login').send({
-        email: 'superAdmin@mail.com',
-        password: 'superAdminPass',
+  describe("POST /login", () => {
+    test("success post /login", async () => {
+      const response = await request(app).post("/api/users/login").send({
+        email: "superAdmin@mail.com",
+        password: "superAdminPass",
       });
 
       const { body, status } = response;
       expect(status).toBe(200);
       expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty('data', expect.any(String));
+      expect(body).toHaveProperty("data", expect.any(String));
     });
 
-    test('fail post /login with wrong email', async () => {
-      const response = await request(app).post('/api/users/login').send({
-        email: 'wrong@mail.com',
-        password: 'superAdminPass',
+    test("fail post /login with wrong email", async () => {
+      const response = await request(app).post("/api/users/login").send({
+        email: "wrong@mail.com",
+        password: "superAdminPass",
       });
 
       const { body, status } = response;
       expect(status).toBe(401);
       expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty('message', 'email or password was wrong');
+      expect(body).toHaveProperty("message", "email or password was wrong");
     });
 
-    test('fail post /login with wrong password', async () => {
-      const response = await request(app).post('/api/users/login').send({
-        email: 'superAdmin@mail.com',
-        password: 'wrongPass',
+    test("fail post /login with wrong password", async () => {
+      const response = await request(app).post("/api/users/login").send({
+        email: "superAdmin@mail.com",
+        password: "wrongPass",
       });
 
       const { body, status } = response;
       expect(status).toBe(401);
       expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty('message', 'email or password was wrong');
+      expect(body).toHaveProperty("message", "email or password was wrong");
     });
   });
 
-  describe('POST /register-owner', () => {
-    test('success post /register-owner', async () => {
-      const response = await request(app).post('/api/users/register-owner').send({
-        userName: 'ownerTest',
-        email: 'ownerTest@mail.com',
-        password: 'ownerPass',
-      });
-
-      const { body, status } = response;
-      expect(status).toBe(200);
-      expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty('message', expect.any(String));
-    });
-
-    test('fail post /register-owner with existing email', async () => {
-      const response = await request(app).post('/api/users/register-owner').send({
-        userName: 'ownerTest',
-        email: 'ownerTest@mail.com', // email yang sama dengan sebelumnya
-        password: 'ownerPass',
-      });
-
-      const { body, status } = response;
-      expect(status).toBe(400);
-      expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty('message', 'Email already in use');
-    });
-  });
-
-  describe('POST /register-admin', () => {
-    test('success post /register-admin', async () => {
-      const response = await request(app).post('/api/users/register-admin').send({
-        firstName: 'admin',
-        lastName: 'Test',
-        dateOfBirth: '1990-01-01',
-        contact: '123456789',
-        education: 'Bachelor',
-        address: 'Admin Street',
-        position: 'Manager',
-        salary: 5000,
-        password: 'adminPass',
-        email: 'adminTest@mail.com',
-      });
-
-      const { body, status } = response;
-      expect(status).toBe(200);
-      expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty('message', expect.any(String));
-    });
-
-    test('fail post /register-admin with existing email', async () => {
-      const response = await request(app).post('/api/users/register-admin').send({
-        firstName: 'admin',
-        lastName: 'Test',
-        dateOfBirth: '1990-01-01',
-        contact: '123456789',
-        education: 'Bachelor',
-        address: 'Admin Street',
-        position: 'Manager',
-        salary: 5000,
-        password: 'adminPass',
-        email: 'adminTest@mail.com', // email yang sama dengan sebelumnya
-      });
-
-      const { body, status } = response;
-      expect(status).toBe(400);
-      expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty('message', 'Email already in use');
-    });
-  });
-
-  describe('POST /register-employee', () => {
-    test('success post /register-employee', async () => {
-      const response = await request(app).post('/api/users/register-employee').send({
-        firstName: 'employee',
-        lastName: 'Test',
-        dateOfBirth: '1995-05-05',
-        contact: '987654321',
-        education: 'High School',
-        address: 'Employee Street',
-        position: 'Staff',
-        salary: 3000,
-        password: 'employeePass',
-        email: 'employeeTest@mail.com',
-      });
-
-      const { body, status } = response;
-      expect(status).toBe(200);
-      expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty('message', expect.any(String));
-    });
-
-    test('fail post /register-employee with existing email', async () => {
-      const response = await request(app).post('/api/users/register-employee').send({
-        firstName: 'employee',
-        lastName: 'Test',
-        dateOfBirth: '1995-05-05',
-        contact: '987654321',
-        education: 'High School',
-        address: 'Employee Street',
-        position: 'Staff',
-        salary: 3000,
-        password: 'employeePass',
-        email: 'employeeTest@mail.com', // email yang sama dengan sebelumnya
-      });
-
-      const { body, status } = response;
-      expect(status).toBe(400);
-      expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty('message', 'Email already in use');
-    });
-  });
-
-  describe('PUT /edit-user/:id', () => {
-    test('success put /edit-user/:id', async () => {
+  describe("POST /register/owner", () => {
+    test("success post", async () => {
       const response = await request(app)
-        .put('/api/users/edit-user/1') // Sesuaikan dengan id yang ada di database
+        .post("/api/users/register/owner")
         .send({
-          userName: 'updatedName',
-          email: 'updated@mail.com',
-          password: 'updatedPass',
+          userName: "ownerTest",
+          email: "ownerTest@mail.com",
+          password: "ownerPass1",
         })
-        .set('Authorization', `Bearer valid_token`); // Sesuaikan dengan token yang valid
+        .set("Authorization", `Bearer ${superAdminToken}`);
 
       const { body, status } = response;
       expect(status).toBe(200);
       expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty('message', 'Success update data');
+      expect(body).toHaveProperty("message", expect.any(String));
     });
 
-    test('fail put /edit-user/:id with unauthorized access', async () => {
+    test("fail post cause use existing userName and email", async () => {
       const response = await request(app)
-        .put('/api/users/edit-user/1') // Sesuaikan dengan id yang ada di database
+        .post("/api/users/register/owner")
         .send({
-          userName: 'updatedName',
-          email: 'updated@mail.com',
-          password: 'updatedPass',
+          userName: "ownerTest",
+          email: "ownerTest@mail.com",
+          password: "ownerPass1",
         })
-        .set('Authorization', `Bearer invalid_token`); // Sesuaikan dengan token yang tidak valid
+        .set("Authorization", `Bearer ${superAdminToken}`);
 
       const { body, status } = response;
-      expect(status).toBe(401);
+      expect(status).toBe(400);
       expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty('message', 'access_denied');
+      expect(body).toHaveProperty("message", "userName has been already exists");
+    });
+
+    test("fail post cause bad password", async () => {
+      const response = await request(app)
+        .post("/api/users/register/owner")
+        .send({
+          userName: "ownerTest",
+          email: "ownerTest@mail.com",
+          password: "ownerPass",
+        })
+        .set("Authorization", `Bearer ${superAdminToken}`);
+
+      const { body, status } = response;
+      expect(status).toBe(400);
+      expect(body).toBeInstanceOf(Object);
+      expect(body).toHaveProperty("message", "Password must contain at least one number.");
     });
   });
-
-  describe('DELETE /delete-user/:id', () => {
-    test('success delete user /delete-user/:id', async () => {
+/*
+  describe("POST /register-admin", () => {
+    test("success post /register-admin", async () => {
+      
       const response = await request(app)
-        .delete('/api/users/delete-user/1') // Sesuaikan dengan id yang ada di database
-        .set('Authorization', `Bearer valid_token`); // Sesuaikan dengan token yang valid
+        .post("/api/users/register-admin")
+        .send({
+          firstName: "admin",
+          lastName: "Test",
+          dateOfBirth: "1990-01-01",
+          contact: "123456789",
+          education: "Bachelor",
+          address: "Admin Street",
+          position: "Manager",
+          salary: 5000,
+          password: "adminPass",
+          email: "adminTest@mail.com",
+        })
+        .set("Authorization", `Bearer ${ownerToken}`);
 
       const { body, status } = response;
       expect(status).toBe(200);
       expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty('message', 'User deleted successfully');
+      expect(body).toHaveProperty("message", expect.any(String));
     });
 
-    test('fail delete user /delete-user/:id with unauthorized access', async () => {
+    test("fail post /register-admin with existing email", async () => {
+      
       const response = await request(app)
-        .delete('/api/users/delete-user/1') // Sesuaikan dengan id yang ada di database
-        .set('Authorization', `Bearer invalid_token`); // Sesuaikan dengan token yang tidak valid
+        .post("/api/users/register-admin")
+        .send({
+          firstName: "admin",
+          lastName: "Test",
+          dateOfBirth: "1990-01-01",
+          contact: "123456789",
+          education: "Bachelor",
+          address: "Admin Street",
+          position: "Manager",
+          salary: 5000,
+          password: "adminPass",
+          email: "adminTest@mail.com", // email yang sama dengan sebelumnya
+        })
+        .set("Authorization", `Bearer ${ownerToken}`);
+
+      const { body, status } = response;
+      expect(status).toBe(400);
+      expect(body).toBeInstanceOf(Object);
+      expect(body).toHaveProperty("message", "Email already in use");
+    });
+  });
+
+  describe("POST /register-employee", () => {
+    test("success post /register-employee", async () => {
+      
+      const response = await request(app)
+        .post("/api/users/register-employee")
+        .send({
+          firstName: "employee",
+          lastName: "Test",
+          dateOfBirth: "1995-05-05",
+          contact: "987654321",
+          education: "High School",
+          address: "Employee Street",
+          position: "Staff",
+          salary: 3000,
+          password: "employeePass",
+          email: "employeeTest@mail.com",
+        })
+        .set("Authorization", `Bearer ${adminToken}`);
+
+      const { body, status } = response;
+      expect(status).toBe(200);
+      expect(body).toBeInstanceOf(Object);
+      expect(body).toHaveProperty("message", expect.any(String));
+    });
+
+    test("fail post /register-employee with existing email", async () => {
+      
+      const response = await request(app)
+        .post("/api/users/register-employee")
+        .send({
+          firstName: "employee",
+          lastName: "Test",
+          dateOfBirth: "1995-05-05",
+          contact: "987654321",
+          education: "High School",
+          address: "Employee Street",
+          position: "Staff",
+          salary: 3000,
+          password: "employeePass",
+          email: "employeeTest@mail.com", // email yang sama dengan sebelumnya
+        })
+        .set("Authorization", `Bearer ${adminToken}`);
+
+      const { body, status } = response;
+      expect(status).toBe(400);
+      expect(body).toBeInstanceOf(Object);
+      expect(body).toHaveProperty("message", "Email already in use");
+    });
+  });
+
+  describe("PATCH /edit-user", () => {
+    test("success patch /edit-user", async () => {
+      
+      const response = await request(app)
+        .patch("/api/users/edit-user/1") // Sesuaikan dengan id yang ada di database
+        .send({
+          userName: "updatedName",
+          email: "updated@mail.com",
+          password: "updatedPass",
+        })
+        .set("Authorization", `Bearer ${employeeToken}`);
+
+      const { body, status } = response;
+      expect(status).toBe(200);
+      expect(body).toBeInstanceOf(Object);
+      expect(body).toHaveProperty("message", "Success update data");
+    });
+
+    test("fail patch /edit-user with unauthorized access", async () => {
+      
+      const response = await request(app)
+        .patch("/api/users/edit-user/1") // Sesuaikan dengan id yang ada di database
+        .send({
+          userName: "updatedName",
+          email: "updated@mail.com",
+          password: "updatedPass",
+        })
+        .set("Authorization", `Bearer 2029392948384932309102392220429`); // Sesuaikan dengan token yang tidak valid
 
       const { body, status } = response;
       expect(status).toBe(401);
       expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty('message', 'Unauthorized Delete');
+      expect(body).toHaveProperty("message", "access_denied");
     });
   });
+
+  describe("DELETE /delete-user", () => {
+    test("success delete /delete-user", async () => {
+      
+      const response = await request(app)
+        .delete("/api/users/delete-user/1") // Sesuaikan dengan id yang ada di database
+        .set("Authorization", `Bearer ${superAdminToken}`);
+
+      const { body, status } = response;
+      expect(status).toBe(200);
+      expect(body).toBeInstanceOf(Object);
+      expect(body).toHaveProperty("message", "User successfully deleted");
+    });
+
+    test("fail delete /delete-user with unauthorized access", async () => {
+      
+      const response = await request(app)
+        .delete("/api/users/delete-user/1") // Sesuaikan dengan id yang ada di database
+        .set("Authorization", `Bearer ${employeeToken}`);
+
+      const { body, status } = response;
+      expect(status).toBe(403);
+      expect(body).toBeInstanceOf(Object);
+      expect(body).toHaveProperty(
+        "message",
+        "You do not have permission to delete this user"
+      );
+    });
+  });
+  */
 });

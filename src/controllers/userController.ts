@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import User, { UserWithEmployee } from "../models/user";
+import User from "../models/user";
 import { comparePassword } from "../helper/bcrypt";
 import { createToken } from "../helper/jsonWebToken";
 import Employee from "../models/employee";
@@ -154,7 +154,7 @@ export const registeringEmployee = async (
       position,
       salary,
       UserId: userId,
-      StoreId: storeId as number,
+      StoreId: storeId,
     });
 
     res
@@ -225,13 +225,20 @@ export const deleteUser = async (
   next: NextFunction
 ) => {
   try {
-    const userId = req.params.id;
-    const user = (await User.findByPk(userId, {
-      include: Employee, // pastikan ini sesuai dengan definisi model Anda
-    })) as UserWithEmployee; // user yang mau dihapus
+    const userId = parseInt(req.params.id, 10); // Pastikan ID dalam format number
+
+    // Mengambil data user beserta Employee terkait
+    const user = await User.findByPk(userId, {
+      include: [
+        {
+          model: Employee,
+          as: 'employees', 
+        },
+      ],
+    });
 
     if (!user) {
-      throw { name: "Not Found", param: "User" };
+      return res.status(404).json({ message: "User not found" });
     }
 
     const userRole = req.userData?.role;
@@ -244,20 +251,18 @@ export const deleteUser = async (
     }
 
     const storesOwner = await Store.findAll({
-      where: { OwnerId: req.userData?.id },
+      where: { OwnerId: ownerId },
     });
 
-    // Owner dapat menghapus user role employee di store yang dimiliki
-    if (userRole === "OWNER") {
-      const userStoreId = user.Employee?.StoreId; // storeId dari tabel Employee
+    // Owner dapat menghapus user di store yang dimiliki
+    if (userRole === "OWNER" && user.role !== "OWNER") {
+      const userStoreId = user.employee?.StoreId; // Ambil StoreId dari Employee
       const isOwnerOfStore = storesOwner.some(
         (store) => store.id === userStoreId
       );
 
       if (!isOwnerOfStore) {
-        throw {
-          name: "Unauthorized Store",
-        };
+        return res.status(403).json({ message: "Unauthorized Store" });
       }
 
       await user.destroy();
@@ -265,24 +270,19 @@ export const deleteUser = async (
     }
 
     // Admin dapat menghapus user role employee di store yang dikelola
-    if (userRole === "ADMIN") {
+    if (userRole === "ADMIN" && user.role !== "OWNER") {
       const adminStoreId = req.userData?.storeId; // storeId dari authMiddleware
-      const userStoreId = user.Employee?.StoreId; // storeId dari tabel Employee
+      const userStoreId = user.employee?.StoreId; // Ambil StoreId dari Employee
 
       if (adminStoreId !== userStoreId) {
-        throw {
-          name: "Unauthorized Store",
-        };
+        return res.status(403).json({ message: "Unauthorized Store" });
       }
 
       await user.destroy();
       return res.status(200).json({ message: "User deleted successfully" });
     }
 
-    throw {
-      name: "Unauthorized Delete",
-      param: "User",
-    };
+    return res.status(403).json({ message: "Unauthorized Delete" });
   } catch (error) {
     next(error);
   }

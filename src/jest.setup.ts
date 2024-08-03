@@ -80,8 +80,8 @@ module.exports = async () => {
     fs.readFileSync(storeFilePath, "utf-8")
   );
 
-  const storeData: TempStore[] = storeJsonData.map((item) => {
-    const tempStore: TempStore = {
+  const storeData = storeJsonData.map((item) => {
+    const tempStore= {
       code: generateStoreCodeTs(
         item.ownerUsername,
         item.category,

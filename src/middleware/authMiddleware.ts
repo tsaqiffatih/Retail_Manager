@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../helper/jsonWebToken";
-import User, { UserWithEmployee } from "../models/user";
+import User from "../models/user";
 import Store from "../models/store";
 import Employee from "../models/employee";
 import { TokenPayload } from "../interface/auth";
@@ -35,9 +35,10 @@ export const authentication = async (
       where: { email: verify.email },
       include: [{
         model: Employee,
+        as: "employee",
         attributes: ["StoreId"],
       }],
-    }) as UserWithEmployee
+    })
 
     if (!user) throw { name: "Invalid Token" };
 
@@ -45,7 +46,7 @@ export const authentication = async (
       id: user.id,
       email: user.email,
       role: user.role,
-      storeId: user.Employee ? user.Employee.StoreId : null,
+      storeId: user.employee ? user.employee.StoreId : null,
     };
 
     next();
