@@ -102,7 +102,7 @@ describe("User Controller Tests", () => {
       expect(body).toHaveProperty("message", expect.any(String));
     });
 
-    test("fail post cause use existing userName and email", async () => {
+    test("fail post cause use existing userName ", async () => {
       const response = await request(app)
         .post("/api/users/register/owner")
         .send({
@@ -116,6 +116,22 @@ describe("User Controller Tests", () => {
       expect(status).toBe(400);
       expect(body).toBeInstanceOf(Object);
       expect(body).toHaveProperty("message", "userName has been already exists");
+    });
+
+    test("fail post cause use existing email", async () => {
+      const response = await request(app)
+        .post("/api/users/register/owner")
+        .send({
+          userName: "ownerTest1",
+          email: "ownerTest@mail.com",
+          password: "ownerPass1",
+        })
+        .set("Authorization", `Bearer ${superAdminToken}`);
+
+      const { body, status } = response;
+      expect(status).toBe(400);
+      expect(body).toBeInstanceOf(Object);
+      expect(body).toHaveProperty("message", "email has been already exists");
     });
 
     test("fail post cause bad password", async () => {
