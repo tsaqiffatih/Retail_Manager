@@ -12,17 +12,19 @@ module.exports = {
       userName: {
         type: Sequelize.STRING,
         allowNull: false,
+        unique:true
       },
       email: {
         type: Sequelize.STRING,
         allowNull: false,
+        unique: true
       },
       password: {
         type: Sequelize.STRING,
         allowNull: false,
       },
       role: {
-        type: Sequelize.ENUM(["Admin", "Owner", "Employee", "Manager", "Super Admin"]),
+        type: Sequelize.ENUM(["ADMIN", "OWNER", "EMPLOYEE", "MANAGER", "SUPER ADMIN"]),
         allowNull: false,
       },
       createdAt: {

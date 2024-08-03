@@ -12,6 +12,7 @@ module.exports = {
       name: {
         type: Sequelize.STRING,
         allowNullL: false,
+        unique: true
       },
       location: {
         type: Sequelize.STRING,

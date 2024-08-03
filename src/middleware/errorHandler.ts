@@ -44,7 +44,7 @@ const errorHandler = (err: CustomError, req: Request, res: Response, next: NextF
         message = 'Forbidden Access';
     } else if (name === 'Required') {
         status = 400;
-        message = `${param} is required`;
+        message = `${param} is required!`;
     } else if (name === 'Unauthorized Store') {
         status = 400;
         message = `Cannot delete user not in your store`;
@@ -54,7 +54,10 @@ const errorHandler = (err: CustomError, req: Request, res: Response, next: NextF
     } else if (name === 'WeakPasswordError') {
         status = 400;
         message = err.message;
-      } else {
+    } else if (name === 'invalid_StoreId') {
+        status = 400;
+        message = "Input a valid Store Id";
+    } else {
         console.log(err);
         
     }

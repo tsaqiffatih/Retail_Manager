@@ -31,9 +31,9 @@ describe("User Controller Tests", () => {
 
    // Simulated payloads for different roles
   const superAdminPayload = { email: 'superAdmin@mail.com', username: 'superAdmin' };
-  const ownerPayload = { email: 'owner@mail.com', username: 'owner' };
-  const adminPayload = { email: 'admin@mail.com', username: 'admin' };
-  const employeePayload = { email: 'employee@mail.com', username: 'employee' };
+  const ownerPayload = { email: 'owner1@mail.com', username: 'owner1Pass' };
+  const adminPayload = { email: 'admin1@mail.com', username: 'admin1Pass' };
+  const employeePayload = { email: 'employee1@mail.com', username: 'employee1Pass' };
 
   // Generate tokens for different roles
   const superAdminToken = createToken(superAdminPayload);
@@ -134,7 +134,7 @@ describe("User Controller Tests", () => {
       expect(body).toHaveProperty("message", "email has been already exists");
     });
 
-    test("fail post cause bad password", async () => {
+    test("fail post cause use bad password", async () => {
       const response = await request(app)
         .post("/api/users/register/owner")
         .send({
@@ -150,12 +150,12 @@ describe("User Controller Tests", () => {
       expect(body).toHaveProperty("message", "Password must contain at least one number.");
     });
   });
-/*
+
   describe("POST /register-admin", () => {
     test("success post /register-admin", async () => {
       
       const response = await request(app)
-        .post("/api/users/register-admin")
+        .post("/api/users/register/admin")
         .send({
           firstName: "admin",
           lastName: "Test",
@@ -163,9 +163,9 @@ describe("User Controller Tests", () => {
           contact: "123456789",
           education: "Bachelor",
           address: "Admin Street",
-          position: "Manager",
-          salary: 5000,
-          password: "adminPass",
+          position: "MANAGER",
+          salary: 500000,
+          password: "adminPass1",
           email: "adminTest@mail.com",
         })
         .set("Authorization", `Bearer ${ownerToken}`);
@@ -175,8 +175,8 @@ describe("User Controller Tests", () => {
       expect(body).toBeInstanceOf(Object);
       expect(body).toHaveProperty("message", expect.any(String));
     });
-
-    test("fail post /register-admin with existing email", async () => {
+/*
+    test("fail post /register-admin with existing userName", async () => {
       
       const response = await request(app)
         .post("/api/users/register-admin")
@@ -189,18 +189,65 @@ describe("User Controller Tests", () => {
           address: "Admin Street",
           position: "Manager",
           salary: 5000,
-          password: "adminPass",
-          email: "adminTest@mail.com", // email yang sama dengan sebelumnya
+          password: "adminPass1",
+          email: "adminTest2@mail.com",
         })
         .set("Authorization", `Bearer ${ownerToken}`);
 
       const { body, status } = response;
       expect(status).toBe(400);
       expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty("message", "Email already in use");
+      expect(body).toHaveProperty("message", "Email has been already exists");
     });
-  });
 
+    test("fail post /register-admin with existing email", async () => {
+      const response = await request(app)
+        .post("/api/users/register-admin")
+        .send({
+          firstName: "admin",
+          lastName: "Test2",
+          dateOfBirth: "1990-01-01",
+          contact: "123456789",
+          education: "Bachelor",
+          address: "Admin Street",
+          position: "Manager",
+          salary: 5000,
+          password: "adminPass1",
+          email: "adminTest@mail.com",
+        })
+        .set("Authorization", `Bearer ${ownerToken}`);
+
+      const { body, status } = response;
+      expect(status).toBe(400);
+      expect(body).toBeInstanceOf(Object);
+      expect(body).toHaveProperty("message", "email has been already exists");
+    });
+
+    test("fail post cause authorize role ", async () => {
+      const response = await request(app)
+        .post("/api/users/register-admin")
+        .send({
+          firstName: "admin",
+          lastName: "Test2",
+          dateOfBirth: "1990-01-01",
+          contact: "123456789",
+          education: "Bachelor",
+          address: "Admin Street",
+          position: "Manager",
+          salary: 5000,
+          password: "adminPass1",
+          email: "adminTest@mail.com",
+        })
+        .set("Authorization", `Bearer ${employeeToken}`);
+
+      const { body, status } = response;
+      expect(status).toBe(403);
+      expect(body).toBeInstanceOf(Object);
+      expect(body).toHaveProperty("message", "Forbidden Access");
+    });
+    */
+  });
+/*
   describe("POST /register-employee", () => {
     test("success post /register-employee", async () => {
       

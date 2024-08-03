@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import router  from './routers'
 import errorHandler from './middleware/errorHandler'
+import sequelizeConnection from './config/connection'
 
 dotenv.config()
 
@@ -19,9 +20,19 @@ app.get('/api/users', (req:Request, res:Response) => {
   res.send('Hello World!')
 })
 
-export const server = app.listen(port, () => {
-  console.log(`Example app for ${appName} listening on port ${port}`)
-})
+// export const server = app.listen(port, () => {
+//   console.log(`Example app for ${appName} listening on port ${port}`)
+// })
+
+export const server = sequelizeConnection.sync()
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`Example app for ${appName} listening on port ${port}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Error syncing database:', err);
+  });
 
 
 export default app;

@@ -76,6 +76,7 @@ export const registeringAdmin = async (
       salary,
       password,
       email,
+      storeId
     } = req.body;
 
     const username = firstName + lastName;
@@ -88,7 +89,22 @@ export const registeringAdmin = async (
     });
 
     const userId = user.id;
-    const storeId = req.userData?.storeId;
+
+    if (!storeId) {
+      throw {name: "Required", param: "storeId"}
+    }
+    
+    const store = await Store.findOne({where: {id: storeId}})
+
+    if (!store) {
+      throw {name: "Not Found", param: "Store"}
+    }
+
+    const ownerId = req.userData?.id
+ 
+    if (store.OwnerId !== ownerId) {
+      throw {name: "invalid_StoreId"}
+    } 
 
     const employee = await Employee.create({
       firstName,
@@ -100,7 +116,7 @@ export const registeringAdmin = async (
       position,
       salary,
       UserId: userId,
-      StoreId: storeId as number,
+      StoreId: storeId ,
     });
 
     res

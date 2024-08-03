@@ -53,6 +53,7 @@ const config: DatabaseConfig = databaseConfig[env as keyof Config];
 const sequelizeConnection = new Sequelize(config.database, config.username, config.password, {
     host: config.host,
     dialect: "postgres",
+    models: [User,Store,Employee,Payroll,Attendance,AuditLog]
 });
 
 sequelizeConnection.addModels([User,Store,Employee,Payroll,Attendance,AuditLog])

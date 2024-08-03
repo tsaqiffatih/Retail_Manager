@@ -40,7 +40,7 @@ export const authentication = async (
       }],
     })
 
-    if (!user) throw { name: "Invalid Token" };
+    if (!user) throw { name: "invalid token" };
 
     req.userData = {
       id: user.id,
@@ -59,7 +59,7 @@ export const authorizeRole = (...requiredRoles: string[]) => {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (!req.userData || !requiredRoles.includes(req.userData.role)) {
-        throw { name: "Forbidden" };
+        throw { name: "forbidden" };
       }
       next();
     } catch (error) {
