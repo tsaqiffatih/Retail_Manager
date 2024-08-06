@@ -7,7 +7,6 @@ import { AuthenticatedRequest } from "../middleware/authMiddleware";
 import Store from "../models/store";
 import { Op } from "sequelize";
 import AuditLog from "../models/auditlog";
-import { QueryParams } from "../interface";
 import Attendance from "../models/attendance";
 import Payroll from "../models/payroll";
 
@@ -254,17 +253,10 @@ export const deleteUser = async (
   next: NextFunction
 ) => {
   try {
-    const userId = parseInt(req.params.id, 10); // Pastikan ID dalam format number
+    const userId = parseInt(req.params.id, 10); 
 
     // Mengambil data user beserta Employee terkait
-    const user = await User.findByPk(userId, {
-      include: [
-        {
-          model: Employee,
-          as: "employees",
-        },
-      ],
-    });
+    const user = await User.findByPk(userId);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -284,8 +276,10 @@ export const deleteUser = async (
     });
 
     // Owner dapat menghapus user di store yang dimiliki
-    if (userRole === "OWNER" && user.role !== "OWNER") {
+    if (userRole === "OWNER" && user.role !== "OWNER" && user.role !== "SUPER ADMIN") {
+      // StoreId dari user yang ingin di hapus
       const userStoreId = user.employee?.StoreId; // Ambil StoreId dari Employee
+      // cek,apakah user yang akan di hapus merupakan karyawan dari Owner atau bukan
       const isOwnerOfStore = storesOwner.some(
         (store) => store.id === userStoreId
       );
@@ -299,7 +293,7 @@ export const deleteUser = async (
     }
 
     // Admin dapat menghapus user role employee di store yang dikelola
-    if (userRole === "ADMIN" && user.role !== "OWNER") {
+    if (userRole === "ADMIN" || userRole === 'MANAGER' && user.role !== "OWNER") {
       const adminStoreId = req.userData?.storeId; // storeId dari authMiddleware
       const userStoreId = user.employee?.StoreId; // Ambil StoreId dari Employee
 
