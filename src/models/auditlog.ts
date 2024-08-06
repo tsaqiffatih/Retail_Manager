@@ -28,22 +28,32 @@ class AuditLog extends Model {
 
   @Column({
     type: DataType.STRING,
+    allowNull: false,
   })
-  entity?: string;
+  entity_name!: string;
 
   @Column({
     type: DataType.INTEGER,
+    allowNull: true,
   })
   entity_id?: number;
 
   @Column({
     type: DataType.JSON,
+    allowNull: true,
   })
-  entity_snapshot?: JSON;
+  previous_data?: JSON;
+
+  @Column({
+    type: DataType.JSON,
+    allowNull: true,
+  })
+  new_data?: JSON;
 
   @Column({
     type: DataType.DATE,
     allowNull: false,
+    defaultValue: DataType.NOW,
     validate: {
       notNull: { msg: "Timestamp cannot be null" },
       notEmpty: { msg: "Timestamp is required" },
@@ -62,22 +72,23 @@ class AuditLog extends Model {
   })
   UserId!: number;
 
-  @BelongsTo(() => User, { foreignKey: 'UserId', as: 'user' })
+  @BelongsTo(() => User, { foreignKey: 'UserId' })
   user!: User;
 
   static async createLog(params: {
     action: ActionType;
-    entity?: string;
+    entity_name: string;
     entity_id?: number;
-    entity_snapshot?: JSON;
+    previous_data?: JSON;
+    new_data?: JSON;
     timestamp: Date;
     UserId: number;
   }) {
     try {
-      const { action, entity, entity_id, entity_snapshot, timestamp, UserId } = params;
+      const { action, entity_name, entity_id, previous_data, new_data, timestamp, UserId } = params;
 
       await this.create({
-        action, entity, entity_id, entity_snapshot, timestamp, UserId
+        action, entity_name, entity_id, previous_data, new_data, timestamp, UserId
       });
     } catch (error) {
       console.error("Failed to log audit:", error);

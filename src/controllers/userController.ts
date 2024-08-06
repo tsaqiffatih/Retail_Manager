@@ -5,6 +5,11 @@ import { createToken } from "../helper/jsonWebToken";
 import Employee from "../models/employee";
 import { AuthenticatedRequest } from "../middleware/authMiddleware";
 import Store from "../models/store";
+import { Op } from "sequelize";
+import AuditLog from "../models/auditlog";
+import { QueryParams } from "../interface";
+import Attendance from "../models/attendance";
+import Payroll from "../models/payroll";
 
 // method for user login
 export const login = async (
@@ -33,6 +38,28 @@ export const login = async (
   }
 };
 
+export const registerUser = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const role = req.userData?.role;
+
+    if (role == "SUPER ADMIN") {
+      await registeringOwner(req, res, next);
+    } else if (role == "OWNER") {
+      await registeringAdmin(req, res, next);
+    } else if (role == "ADMIN" || role == "MANAGER") {
+      await registeringEmployee(req, res, next);
+    } else {
+      throw {name: "forbidden"}
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
 // method for registering user role owner (AUTHORIZE FOR SUPER ADMIN)
 export const registeringOwner = async (
   req: Request,
@@ -53,7 +80,6 @@ export const registeringOwner = async (
       .status(200)
       .json({ message: `New User with email: ${email}, have been registered` });
   } catch (error) {
-    // console.log(error);
     next(error);
   }
 };
@@ -76,35 +102,36 @@ export const registeringAdmin = async (
       salary,
       password,
       email,
-      storeId
+      storeId,
+      role
     } = req.body;
 
-    const username = firstName + lastName;
+    const userName = firstName + lastName;
 
     const user = await User.create({
-      userName: username,
+      userName: userName,
       email,
       password,
-      role: "ADMIN",
+      role: role,
     });
 
     const userId = user.id;
 
     if (!storeId) {
-      throw {name: "Required", param: "storeId"}
+      throw { name: "Required", param: "storeId" };
     }
-    
-    const store = await Store.findOne({where: {id: storeId}})
+
+    const store = await Store.findOne({ where: { id: storeId } });
 
     if (!store) {
-      throw {name: "Not Found", param: "Store"}
+      throw { name: "Not Found", param: "Store" };
     }
 
-    const ownerId = req.userData?.id
- 
+    const ownerId = req.userData?.id;
+
     if (store.OwnerId !== ownerId) {
-      throw {name: "invalid_StoreId"}
-    } 
+      throw { name: "invalid_StoreId" };
+    }
 
     const employee = await Employee.create({
       firstName,
@@ -116,14 +143,13 @@ export const registeringAdmin = async (
       position,
       salary,
       UserId: userId,
-      StoreId: storeId ,
+      StoreId: storeId,
     });
 
     res
       .status(200)
       .json({ message: `New User with email: ${email}, have been registered` });
   } catch (error) {
-    // console.log(error);
     next(error);
   }
 };
@@ -248,7 +274,7 @@ export const deleteUser = async (
       include: [
         {
           model: Employee,
-          as: 'employees', 
+          as: "employees",
         },
       ],
     });
@@ -341,12 +367,23 @@ export const deleteUser = async (
 };
 */
 
-export const readOne = async () => {
+export const readOne = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-  } catch (error) {}
+  } catch (error) {
+    next(error);
+  }
 };
 
-export const readAll = async () => {
-  try {
-  } catch (error) {}
-};
+
+// buat apa?
+/*
+ngambil data User, tapi untuk apa ngambil data user ini? 
+ya untuk ngambil data user yang ada di tokonya. 
+role admin, ngambil data user dengan role employee dan manager dan admin yang StoreId nya sama dengan dia
+ include data attendance, data employee, data payroll nya
+role Owner, ngambil data user dengan role employee dan manager dan admin yang 
+*/

@@ -1,6 +1,9 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo, HasMany } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, HasMany, BeforeCreate } from 'sequelize-typescript';
 import User from './user';
 import Employee from './employee';
+import { isValidIndonesianLocation } from '../helper/locationValidation';
+import { generateStoreCodeTs } from '../helper/codeGenerator';
+import { isValidCategory } from '../helper/isValidCategory';
 
 // Definisi model Store tanpa parameter generik
 @Table
@@ -32,6 +35,11 @@ class Store extends Model {
     validate: {
       notNull: { msg: "Store location cannot be null" },
       notEmpty: { msg: "Store location is required" },
+      isValidLocationCheck(value: string) {
+        if(!isValidIndonesianLocation(value)) {
+          throw {name: "invalid_location"}
+        }
+      }
     },
   })
   location!: string;
@@ -42,10 +50,11 @@ class Store extends Model {
     validate: {
       notNull: { msg: "Store category cannot be null" },
       notEmpty: { msg: "Store category is required" },
-      isIn: {
-        args: [["Grocery Store", "Bookstore", "Restaurant & Cafe", "Other"]],
-        msg: "Store category was wrong!",
-      },
+      isValidCategoryCheck(value: string) {
+        if(!isValidCategory(value)) {
+          throw {name: "invalid_category"}
+        }
+      }
     },
   })
   category!: string;
@@ -66,11 +75,22 @@ class Store extends Model {
   })
   OwnerId!: number;
 
-  @BelongsTo(() => User, { foreignKey: 'OwnerId', as: 'user' })
+  @BelongsTo(() => User, { foreignKey: 'OwnerId' , onDelete: 'CASCADE'})
   user!: User;
 
-  @HasMany(() => Employee, { foreignKey: 'StoreId', as: 'employees' })
+  @HasMany(() => Employee, { foreignKey: 'StoreId', onDelete: 'CASCADE' })
   employees!: Employee[];
+
+  @BeforeCreate
+  static async createStoreCode(store: Store) {
+    const user = await User.findByPk(store.OwnerId) 
+    if (!user) {
+      throw {name: 'Not Found', param: 'User'}
+    }
+    store.code = generateStoreCodeTs(
+      user?.userName,store.category,store.location,new Date(),store.OwnerId
+    )
+  }
 
   static async findByOwnerId(userId: number): Promise<number[]> {
     const stores = await this.findAll({

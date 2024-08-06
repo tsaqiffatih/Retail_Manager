@@ -1,5 +1,12 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import Employee from './employee';
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  ForeignKey,
+  BelongsTo,
+} from "sequelize-typescript";
+import Employee from "./employee";
 
 type StatusType = "Present" | "Absent" | "Sick" | "Leave";
 
@@ -48,7 +55,7 @@ class Attendance extends Model {
   })
   EmployeeId!: number;
 
-  @BelongsTo(() => Employee, { foreignKey: 'EmployeeId' })
+  @BelongsTo(() => Employee, { foreignKey: "EmployeeId", onDelete: "CASCADE" })
   employee!: Employee;
 }
 

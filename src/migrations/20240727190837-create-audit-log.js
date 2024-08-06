@@ -10,21 +10,29 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       action: {
-        type: Sequelize.ENUM(['CREATE', 'READ', 'DELETE', 'UPDATE', 'READ ONE']),
+        type: Sequelize.ENUM('CREATE', 'READ', 'DELETE', 'UPDATE', 'READ ONE'),
         allowNull: false,
       },
-      entity: {
+      entity_name: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       entity_id: {
         type: Sequelize.INTEGER,
+        allowNull: true,
       },
-      entity_snapshot: {
+      previous_data: {
         type: Sequelize.JSON,
+        allowNull: true,
+      },
+      new_data: {
+        type: Sequelize.JSON,
+        allowNull: true,
       },
       timestamp: {
         type: Sequelize.DATE,
         allowNull: false,
+        defaultValue: Sequelize.NOW,
       },
       UserId: {
         type: Sequelize.INTEGER,
@@ -32,15 +40,18 @@ module.exports = {
         references: {
           model: "Users",
           key: "id"
-        }
+        },
+        onUpdate: 'CASCADE',
       },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW,
       },
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW,
       },
     });
   },

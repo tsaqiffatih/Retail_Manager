@@ -1,5 +1,6 @@
 // Peta singkatan lokasi
-const locationMap: { [key: string]: string } = {
+export const locationMap: { [key: string]: string } = {
+  "Jakarta" : 'JKT',
   "Banda Aceh": 'BAC',
   "Sabang": 'SAB',
   "Medan": 'MDN',
@@ -32,16 +33,16 @@ const locationMap: { [key: string]: string } = {
   "Jakarta Timur": 'JKT-T',
   "Jakarta Barat": 'JKT-B',
   "Bandung": 'BDG',
-  "Bogor": 'BOG',
-  "Bekasi": 'BEK',
-  "Depok": 'DEP',
+  "Bogor": 'BGR',
+  "Bekasi": 'BKS',
+  "Depok": 'DPK',
   "Cimahi": 'CMH',
   "Semarang": 'SMG',
   "Surakarta": 'SKR',
   "Salatiga": 'SLT',
   "Pekalongan": 'PKL',
-  "Tegal": 'TEG',
-  "Yogyakarta": 'YOG',
+  "Tegal": 'TGL',
+  "Yogyakarta": 'YGY',
   "Surabaya": 'SBY',
   "Malang": 'MLG',
   "Kediri": 'KDR',
@@ -87,7 +88,57 @@ const locationMap: { [key: string]: string } = {
   "Merauke": 'MER',
   "Manokwari": 'MKW',
   "Fakfak": 'FKK',
-  "Raja Ampat": 'RA'
+  "Raja Ampat": 'RA',
+  "Langsa": 'LGS',
+  "Lhokseumawe": 'LKME',
+  "Wamena": 'WMN',
+  "Ruteng": 'RTG',
+  "Labuan Bajo": 'LBB',
+  "Tanjung Selor": 'TNSR',
+  "Sampit": 'SPT',
+  "Muara Teweh": 'MRTW',
+  "Luwuk": 'LWK',
+  "Tolitoli": 'TLT',
+  "Cirebon": 'CRB',
+  "Purwokerto": 'PWT',
+  "Banjar": 'BNJ',
+  "Batu": 'BTU',
+  "Gunungsitoli": 'GST',
+  "Kotamobagu": 'KMB',
+  "Madiun": 'MDN',
+  "Magelang": 'MGL',
+  "Mojokerto": 'MJK',
+  "Padangpanjang": 'PPJ',
+  "Pariaman": 'PRM',
+  "Pasuruan": 'PSR',
+  "Pematangsiantar": 'PMS',
+  "Prabumulih": 'PRB',
+  "Sawahlunto": 'SWL',
+  "Subulussalam": 'SBL',
+  "Sukabumi": 'SKB',
+  "Tanjungbalai": 'TJB',
+  "Tanjungpinang": 'TPG',
+  "Tasikmalaya": 'TSM',
+  "Tidore Kepulauan": 'TID'
+};
+
+
+export const categoryMap: { [key: string]: string } = {
+  "grocery": "GR",
+  "electronics": "EL",
+  "clothing": "CL",
+  "books and stationery": "BS",
+  "beauty and personal care": "BP",
+  "home furnishings": "HF",
+  "toys": "TO",
+  "sports and outdoors": "SO",
+  "automotive": "AU",
+  "gardening": "GA",
+  "health and wellness": "HW",
+  "kitchen and dining": "KD",
+  "home improvement": "HI",
+  "baby and kids": "BK",
+  "travel and luggage": "TL"
 };
 
 // Fungsi utama untuk menghasilkan kode toko
@@ -110,30 +161,23 @@ function generateStoreCodeTs(
 
 // Fungsi untuk mendapatkan singkatan kategori
 function getCategoryCode(category: string): string {
-  const categoryMap: { [key: string]: string } = {
-    "grocery": "GR",
-    "electronics": "EL",
-    "clothing": "CL",
-    "books and stationery": "BS",
-    "beauty and personal care": "BP",
-    "home furnishings": "HF",
-    "toys": "TO",
-    "sports and outdoors": "SO",
-    "automotive": "AU",
-    "gardening": "GA",
-    "health and wellness": "HW",
-    "kitchen and dining": "KD",
-    "home improvement": "HI",
-    "baby and kids": "BK",
-    "travel and luggage": "TL"
-  };
-  return categoryMap[category.toLowerCase()] || "OT"; // Jika kategori tidak dikenali, misalnya "Other"
+
+  return categoryMap[category.toLowerCase()] || "OT"; 
 }
 
 // Fungsi untuk mendapatkan inisial nama pemilik
-function getNameInitial(name: string): string {
-  // Ambil singkatan dari nama pemilik
-  return name.replace(/\s+/g, "").toUpperCase();
+function getNameInitial(name: string) {
+  const words = name.split(/\s+/);
+
+  if (words.length === 1) {
+    const singleWord = words[0].toUpperCase();
+    return singleWord.slice(0, 2) + singleWord.slice(-2);
+  }
+
+  const firstWordInitial = words[0].slice(0, 2).toUpperCase();
+  const secondWordInitial = words[1].slice(0, 2).toUpperCase();
+
+  return firstWordInitial + secondWordInitial;
 }
 
 // Fungsi untuk mendapatkan singkatan lokasi

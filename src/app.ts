@@ -24,15 +24,26 @@ app.get('/api/users', (req:Request, res:Response) => {
 //   console.log(`Example app for ${appName} listening on port ${port}`)
 // })
 
-export const server = sequelizeConnection.sync()
-  .then(() => {
-    app.listen(port, () => {
-      console.log(`Example app for ${appName} listening on port ${port}`);
+// export const server = sequelizeConnection.sync()
+//   .then(() => {
+//     app.listen(port, () => {
+//       console.log(`Example app for ${appName} listening on port ${port}`);
+//     });
+//   })
+//   .catch((err) => {
+//     console.error('Error syncing database:', err);
+//   });
+
+export const server = app.listen(port, () => {
+  console.log(`Example app for ${appName} listening on port ${port}`);
+  sequelizeConnection.sync()
+    .then(() => {
+      console.log('Database synced successfully.');
+    })
+    .catch((err) => {
+      console.error('Error syncing database:', err);
     });
-  })
-  .catch((err) => {
-    console.error('Error syncing database:', err);
-  });
+});
 
 
 export default app;

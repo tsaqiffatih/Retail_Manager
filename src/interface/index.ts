@@ -11,3 +11,11 @@ export interface TempStore extends Omit<StoreJson, 'ownerUsername'> {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export interface QueryParams {
+  search?: string;
+  page?: string;
+  limit?: string;
+  sortBy?: string;
+  order?: 'ASC' | 'DESC';
+}

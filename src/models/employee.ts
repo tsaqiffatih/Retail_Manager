@@ -111,10 +111,10 @@ class Employee extends Model {
   })
   StoreId!: number;
 
-  @BelongsTo(() => User, { foreignKey: 'UserId' })
+  @BelongsTo(() => User, { foreignKey: 'UserId' , onDelete: 'CASCADE'})
   user!: User;
 
-  @BelongsTo(() => Store, { foreignKey: 'StoreId' })
+  @BelongsTo(() => Store, { foreignKey: 'StoreId', onDelete: 'CASCADE' })
   store!: Store;
 
   @HasMany(() => Payroll, { foreignKey: 'EmployeeId' })

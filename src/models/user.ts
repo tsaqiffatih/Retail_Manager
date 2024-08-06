@@ -76,7 +76,7 @@ class User extends Model {
 
   @BeforeCreate
   static async validateAndHashPassword(user: User) {
-    await isStrongPassword(user.password);  // Validasi kekuatan password
+    await isStrongPassword(user.password); 
     user.password = await hashAsyncPassword(user.password);
   }
 

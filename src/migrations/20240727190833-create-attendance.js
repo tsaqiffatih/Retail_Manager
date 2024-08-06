@@ -23,7 +23,9 @@ module.exports = {
         references: {
           model: "Employees",
           key: "id"
-        }
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       createdAt: {
         allowNull: false,

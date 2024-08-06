@@ -1,100 +1,86 @@
 [
     {
         "action" : "CREATE",
-        "entity" : "USER",
+        "entity_name" : "USER",
         "entity_id" : 2,
-        "entity_snapshot" : null,
         "UserId" : 1
     },
     {
         "action" : "CREATE",
-        "entity" : "STORE",
+        "entity_name" : "STORE",
         "entity_id" : 1,
-        "entity_snapshot" : null,
         "UserId" : 2
     },
     {
         "action" : "CREATE",
-        "entity" : "STORE",
+        "entity_name" : "STORE",
         "entity_id" : 2,
-        "entity_snapshot" : null,
         "UserId" : 2
     },
     {
         "action" : "CREATE",
-        "entity" : "STORE",
+        "entity_name" : "STORE",
         "entity_id" : 3,
-        "entity_snapshot" : null,
         "UserId" : 2
     },
     {
         "action" : "CREATE",
-        "entity" : "USER",
+        "entity_name" : "USER",
         "entity_id" : 3,
-        "entity_snapshot" : null,
         "UserId" : 2
     },
     {
         "action" : "CREATE",
-        "entity" : "EMPLOYEE",
+        "entity_name" : "EMPLOYEE",
         "entity_id" : 1,
-        "entity_snapshot" : null,
         "UserId" : 2
     },
     {
         "action" : "CREATE",
-        "entity" : "USER",
+        "entity_name" : "USER",
         "entity_id" : 4,
-        "entity_snapshot" : null,
         "UserId" : 2
     },
     {
         "action" : "CREATE",
-        "entity" : "EMPLOYEE",
+        "entity_name" : "EMPLOYEE",
         "entity_id" : 2,
-        "entity_snapshot" : null,
         "UserId" : 2
     },
     {
         "action" : "CREATE",
-        "entity" : "USER",
+        "entity_name" : "USER",
         "entity_id" : 5,
-        "entity_snapshot" : null,
         "UserId" : 2
     },
     {
         "action" : "CREATE",
-        "entity" : "EMPLOYEE",
+        "entity_name" : "EMPLOYEE",
         "entity_id" : 3,
-        "entity_snapshot" : null,
         "UserId" : 2
     },
     {
         "action" : "CREATE",
-        "entity" : "USER",
+        "entity_name" : "USER",
         "entity_id" : 6,
-        "entity_snapshot" : null,
         "UserId" : 2
     },
     {
         "action" : "CREATE",
-        "entity" : "EMPLOYEE",
+        "entity_name" : "EMPLOYEE",
         "entity_id" : 4,
-        "entity_snapshot" : null,
         "UserId" : 2
     },
     {
         "action" : "CREATE",
-        "entity" : "USER",
+        "entity_name" : "USER",
         "entity_id" : 7,
-        "entity_snapshot" : null,
         "UserId" : 2
     },
     {
         "action" : "CREATE",
-        "entity" : "EMPLOYEE",
+        "entity_name" : "EMPLOYEE",
         "entity_id" : 5,
-        "entity_snapshot" : null,
         "UserId" : 2
     }
 ]

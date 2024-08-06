@@ -57,7 +57,7 @@ class Payroll extends Model {
   })
   EmployeeId!: number;
 
-  @BelongsTo(() => Employee, { foreignKey: 'EmployeeId' })
+  @BelongsTo(() => Employee, { foreignKey: 'EmployeeId', onDelete: 'CASCADE' })
   employee!: Employee;
 }
 

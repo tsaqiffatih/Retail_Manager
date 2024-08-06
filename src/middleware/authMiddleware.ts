@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../helper/jsonWebToken";
-import User from "../models/user";
+import User, { UserRole } from "../models/user";
 import Store from "../models/store";
 import Employee from "../models/employee";
 import { TokenPayload } from "../interface/auth";
@@ -9,7 +9,7 @@ export interface AuthenticatedRequest extends Request {
   userData?: {
     id: number;
     email: string;
-    role: string;
+    role: UserRole;
     storeId: number | null;
   };
 }
@@ -55,7 +55,7 @@ export const authentication = async (
   }
 };
 
-export const authorizeRole = (...requiredRoles: string[]) => {
+export const authorizeRole = (...requiredRoles: UserRole[]) => {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (!req.userData || !requiredRoles.includes(req.userData.role)) {

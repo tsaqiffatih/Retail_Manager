@@ -57,6 +57,15 @@ const errorHandler = (err: CustomError, req: Request, res: Response, next: NextF
     } else if (name === 'invalid_StoreId') {
         status = 400;
         message = "Input a valid Store Id";
+    } else if (name === 'invalid_location') {
+        status = 400;
+        message = "Store location must be in indonesia location";
+    } else if (name === 'invalid_category') {
+        status = 400;
+        message = "Invalid Store Category";
+    } else if (name === 'Unauthorized_Get_Store') {
+        status = 400;
+        message = "You do not have permission to access this store";
     } else {
         console.log(err);
         

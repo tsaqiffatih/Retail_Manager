@@ -46,14 +46,18 @@ module.exports = {
         references: {
           model: "Users",
           key: "id"
-        }
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       StoreId: {
         type: Sequelize.INTEGER,
         references: {
           model: "Stores",
           key: "id"
-        }
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       createdAt: {
         allowNull: false,
