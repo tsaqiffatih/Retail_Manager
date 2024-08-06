@@ -55,7 +55,7 @@ const determineAction = (method: string): "CREATE" | "READ" | "DELETE" | "UPDATE
     case 'PATCH':
       return 'UPDATE';
     default:
-      throw new Error('Invalid method');
+      throw {name: 'Invalid Action Type'};
   }
 };
 

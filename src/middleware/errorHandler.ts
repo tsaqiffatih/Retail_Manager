@@ -66,6 +66,9 @@ const errorHandler = (err: CustomError, req: Request, res: Response, next: NextF
     } else if (name === 'Unauthorized_Get_Store') {
         status = 400;
         message = "You do not have permission to access this store";
+    } else if (name === 'Invalid Action Type') {
+        status = 400;
+        message = "Invalid Action Type";
     } else {
         console.log(err);
         

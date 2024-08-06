@@ -158,3 +158,28 @@ export const destroyStore = async (
     next(error)
   }
 }
+
+export const editStore = async (req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction) => {
+    try {
+      const id = req.params.id
+      const userId = req.userData?.id
+
+      const {name, location, category} = req.body
+
+      const store = await Store.findByPk(id)
+
+      if (!store) throw { name: "Not Found", param: "Store" };
+
+      if (userId !== store.OwnerId) {
+        throw {name: "access_denied"}
+      }
+
+      await store.update(req.body);
+
+      res.status(200).json({message: "Success update store data"})
+    } catch (error) {
+      next(error)
+    }
+}

@@ -53,7 +53,7 @@ export const registerUser = async (
     } else if (role == "ADMIN" || role == "MANAGER") {
       await registeringEmployee(req, res, next);
     } else {
-      throw {name: "forbidden"}
+      throw { name: "forbidden" };
     }
   } catch (error) {
     next(error);
@@ -103,7 +103,7 @@ export const registeringAdmin = async (
       password,
       email,
       storeId,
-      role
+      role,
     } = req.body;
 
     const userName = firstName + lastName;
@@ -231,30 +231,17 @@ export const editUser = async (
 ) => {
   try {
     const userId = req.params.id;
-    const { userName, email, password } = req.body;
-    // user hanya bisa mengupdate data dirinya sendiri
+
     if (parseInt(userId) != req.userData?.id) {
       throw { name: "access_denied" };
     }
 
     const user = await User.findByPk(userId);
-
     if (!user) throw { name: "Not Found", param: "User" };
 
-    if (userName) user.userName = userName;
-    if (password) user.password = password;
-    if (email && email !== user.email) {
-      const existingUser = await User.findOne({ where: { email } });
-      if (existingUser) {
-        res.status(400).json({ message: "Email already in use" });
-        return;
-      }
-      user.email = email;
-    }
+    await user.update(req.body);
 
-    await user.save();
-
-    res.status(200).json({ message: "Success update data" });
+    res.status(200).json({ message: "Success update user data" });
   } catch (error) {
     next(error);
   }
@@ -377,7 +364,6 @@ export const readOne = async (
     next(error);
   }
 };
-
 
 // buat apa?
 /*

@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo, HasMany, BeforeCreate } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, HasMany, BeforeCreate, BeforeUpdate } from 'sequelize-typescript';
 import User from './user';
 import Employee from './employee';
 import { isValidIndonesianLocation } from '../helper/locationValidation';
@@ -81,6 +81,7 @@ class Store extends Model {
   @HasMany(() => Employee, { foreignKey: 'StoreId', onDelete: 'CASCADE' })
   employees!: Employee[];
 
+  @BeforeUpdate
   @BeforeCreate
   static async createStoreCode(store: Store) {
     const user = await User.findByPk(store.OwnerId) 

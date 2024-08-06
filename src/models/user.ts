@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo, HasMany, HasOne, BeforeCreate } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, HasMany, HasOne, BeforeCreate, BeforeUpdate } from 'sequelize-typescript';
 import Employee from './employee';
 import Store from './store';
 import AuditLog from './auditlog';
@@ -75,6 +75,7 @@ class User extends Model {
   auditLogs!: AuditLog[];
 
   @BeforeCreate
+  @BeforeUpdate
   static async validateAndHashPassword(user: User) {
     await isStrongPassword(user.password); 
     user.password = await hashAsyncPassword(user.password);
