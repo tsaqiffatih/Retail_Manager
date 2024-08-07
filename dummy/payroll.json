@@ -28,5 +28,17 @@
     "amount": 2500000,
     "status": "PAID",
     "EmployeeId": 5
+  },
+  {
+    "date": "2024-08-01",
+    "amount": 2500000,
+    "status": "PAID",
+    "EmployeeId": 6
+  },
+  {
+    "date": "2024-08-01",
+    "amount": 2500000,
+    "status": "PAID",
+    "EmployeeId": 7
   }
 ]

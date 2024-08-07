@@ -58,5 +58,29 @@
     "salary": 2500000,
     "UserId": 7,
     "StoreId": 1
+  },
+  {
+    "firstName": "Luthfi",
+    "lastName": "boss21",
+    "dateOfBirth": "1992-03-03",
+    "contact": "7777777777",
+    "education": "Bachelor",
+    "address": "Jl. Bali No. 4",
+    "position": "Cashier",
+    "salary": 2500000,
+    "UserId": 9,
+    "StoreId": 4
+  },
+  {
+    "firstName": "Jamil",
+    "lastName": "boss21",
+    "dateOfBirth": "1992-03-03",
+    "contact": "7777777777",
+    "education": "Bachelor",
+    "address": "Jl. Bali No. 4",
+    "position": "Cashier",
+    "salary": 2500000,
+    "UserId": 10,
+    "StoreId": 4
   }
 ]

@@ -122,15 +122,7 @@ class Employee extends Model {
 
   @HasMany(() => Attendance, { foreignKey: 'EmployeeId' })
   attendances!: Attendance[];
-
-  static async findByOwnerId(userId: number): Promise<number[]> {
-    const employees = await this.findAll({
-      where: { UserId: userId },
-      attributes: ['UserId'],
-    });
-
-    return employees.map(employee => employee.UserId);
-  }
+  
 }
 
 export default Employee;

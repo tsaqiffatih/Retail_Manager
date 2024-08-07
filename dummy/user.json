@@ -40,5 +40,23 @@
     "email": "employee2@mail.com",
     "password": "employee2Pass",
     "role": "EMPLOYEE"
+  },
+  {
+    "userName": "owner21",
+    "email": "owner2@mail.com",
+    "password": "owner1Pass",
+    "role": "OWNER"
+  },
+  {
+    "userName": "adminBoss21",
+    "email": "adminBoss21@mail.com",
+    "password": "adminBoss21Pass",
+    "role": "ADMIN"
+  },
+  {
+    "userName": "managerBoss21",
+    "email": "managerBoss21@mail.com",
+    "password": "manager1Pass",
+    "role": "MANAGER"
   }
 ]

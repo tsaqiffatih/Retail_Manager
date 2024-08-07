@@ -19,5 +19,12 @@
     "location": "Bandung",
     "category": "Gardening",
     "OwnerId": 2
+  },
+  {
+    "ownerUsername" : "owner21",
+    "name": "Boss21 Gardening",
+    "location": "Bandung",
+    "category": "Gardening",
+    "OwnerId": 8
   }
 ]

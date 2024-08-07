@@ -59,6 +59,275 @@ export const registerUser = async (
   }
 };
 
+export const editUser = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.params.id;
+
+    if (parseInt(userId) != req.userData?.id) {
+      throw { name: "access_denied" };
+    }
+
+    const user = await User.findByPk(userId);
+    if (!user) throw { name: "Not Found", param: "User" };
+
+    await user.update(req.body);
+
+    res.status(200).json({ message: "Success update user data" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ====> HARD DELETE <=====
+export const deleteUser = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = parseInt(req.params.id, 10);
+
+    // Mengambil data user beserta Employee terkait
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const userRole = req.userData?.role;
+    const ownerId = req.userData?.id as number;
+
+    // Super Admin bisa langsung menghapus user role owner
+    if (userRole === "SUPER ADMIN" && user.role === "OWNER") {
+      await user.destroy();
+      return res.status(200).json({ message: "User deleted successfully" });
+    }
+
+    const storesOwner = await Store.findAll({
+      where: { OwnerId: ownerId },
+    });
+
+    // Owner dapat menghapus user di store yang dimiliki
+    if (
+      userRole === "OWNER" &&
+      user.role !== "OWNER" &&
+      user.role !== "SUPER ADMIN"
+    ) {
+      // StoreId dari user yang ingin di hapus
+      const userStoreId = user.employee?.StoreId; // Ambil StoreId dari Employee
+      // cek,apakah user yang akan di hapus merupakan karyawan dari Owner atau bukan
+      const isOwnerOfStore = storesOwner.some(
+        (store) => store.id === userStoreId
+      );
+
+      if (!isOwnerOfStore) {
+        return res.status(403).json({ message: "Unauthorized Store" });
+      }
+
+      await user.destroy();
+      return res.status(200).json({ message: "User deleted successfully" });
+    }
+
+    // Admin dapat menghapus user role employee di store yang dikelola
+    if (
+      userRole === "ADMIN" ||
+      (userRole === "MANAGER" && user.role !== "OWNER")
+    ) {
+      const adminStoreId = req.userData?.storeId; // storeId dari authMiddleware
+      const userStoreId = user.employee?.StoreId; // Ambil StoreId dari Employee
+
+      if (adminStoreId !== userStoreId) {
+        return res.status(403).json({ message: "Unauthorized Store" });
+      }
+
+      await user.destroy();
+      return res.status(200).json({ message: "User deleted successfully" });
+    }
+
+    return res.status(403).json({ message: "Unauthorized Delete" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/*
+// ======> SOFT DELETE <======
+// ======> TAMBAH KOLOM ISDELETED DI TABLE JIKA INGIN DIGUNAKAN <=====
+export const deleteUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.params.id;
+
+    // Verifikasi hak akses
+    if (parseInt(userId) !== req.userData?.id) {
+      throw { name: 'access_denied' };
+    }
+
+    // Temukan pengguna berdasarkan ID
+    const user = await User.findByPk(userId);
+
+    // Validasi jika pengguna tidak ditemukan
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Tandai pengguna sebagai dihapus (penghapusan logis)
+    user.isDeleted = true;
+    await user.save();
+
+    // Kirim respons sukses
+    res.status(200).json({ message: 'User successfully marked as deleted' });
+
+  } catch (error) {
+    next(error); // Serahkan ke middleware error handler
+  }
+};
+*/
+
+export const readOne = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = req.params.id;
+
+    const user = await User.findByPk(id, {
+      attributes: { exclude: ["password", "role"] },
+      include: {
+        model: Employee,
+        include: [
+          {
+            model: Store,
+          },
+          Attendance,
+          Payroll,
+        ],
+      },
+    });
+
+    if (!user) {
+      throw { name: "Not Found", param: "User" };
+    }
+
+    if (req.userData?.role == "OWNER") {
+      if (req.userData?.id !== user.employee.store.OwnerId) {
+        throw { name: "access_denied" };
+      }
+    } else if (
+      req.userData?.role == "ADMIN" ||
+      req.userData?.role == "MANAGER"
+    ) {
+      if (user?.employee.StoreId !== req.userData?.storeId) {
+        throw { name: "access_denied" };
+      }
+    } else if (req.userData?.role == "EMPLOYEE") {
+      if (req.userData?.id !== user.id) {
+        throw { name: "access_denied" };
+      }
+    } else {
+      throw { name: "access_denied" };
+    }
+
+    res.status(200).json({ message: "success", data: user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const readAll = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { search, page, limit, sortBy, order } = req.query;
+
+    // Default values and parsing
+    const sortField = (sortBy as string) || "userName";
+    const sortOrder = (order as string) || "ASC";
+    const pageNumber = parseInt(page as string) || 1;
+    const limitNumber = parseInt(limit as string) || 10;
+    const offset = (pageNumber - 1) * limitNumber;
+
+    // Get the current user's role and storeId if applicable
+    const userRole = req.userData?.role;
+    const userStoreId = req.userData?.storeId;
+    const userId = req.userData?.id;
+
+    // Build search condition
+    
+    let whereCondition: any = {};
+
+    if (search) {
+      whereCondition = {
+        ...whereCondition,
+        [Op.or]: [
+          { userName: { [Op.iLike]: `%${search}%` } },
+          { email: { [Op.iLike]: `%${search}%` } },
+        ],
+      };
+    }
+
+    // Additional filtering based on role
+    let whereRoleCondition: any = {};
+
+    if (userRole === 'OWNER') {
+      whereRoleCondition = {OwnerId : userId};
+    } else if (userRole === 'ADMIN' || userRole === 'MANAGER') {
+      whereRoleCondition = {id: userStoreId};
+    } else {
+      throw { name: 'access_denied' };
+    }
+
+    // Find and count users
+    const { rows: users, count } = await User.findAndCountAll({
+      order: [[sortField, sortOrder]],
+      limit: limitNumber,
+      offset,
+      attributes: {exclude: ["password","role"]},
+      where: whereCondition,
+      include: [
+        {
+          model: Employee,
+          required: true,
+          include: [
+            {
+              model: Store,
+              where: whereRoleCondition,
+              required: true
+            },
+            {
+              model: Attendance
+            },
+            {
+              model: Payroll
+            },
+          ],
+        },
+      ],
+    });
+
+    // Respond with users and count
+    res.status(200).json({
+      message: "success",
+      data: users,
+      totalItems: count,
+      totalPages: Math.ceil(count / limitNumber),
+      currentPage: pageNumber,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // method for registering user role owner (AUTHORIZE FOR SUPER ADMIN)
 export const registeringOwner = async (
   req: Request,
@@ -108,10 +377,10 @@ export const registeringAdmin = async (
     const userName = firstName + lastName;
 
     const user = await User.create({
-      userName: userName,
+      userName,
       email,
       password,
-      role: role,
+      role,
     });
 
     const userId = user.id;
@@ -207,163 +476,7 @@ export const registeringEmployee = async (
   }
 };
 
-/*
-===> masih rancu <===
-export const editPutUser = async (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const userId = req.params.id
-  } catch (error) {
-    console.log(error);
-    
-  }
-};
-*/
 
-export const editUser = async (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const userId = req.params.id;
 
-    if (parseInt(userId) != req.userData?.id) {
-      throw { name: "access_denied" };
-    }
 
-    const user = await User.findByPk(userId);
-    if (!user) throw { name: "Not Found", param: "User" };
 
-    await user.update(req.body);
-
-    res.status(200).json({ message: "Success update user data" });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// ====> HARD DELETE <=====
-export const deleteUser = async (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const userId = parseInt(req.params.id, 10); 
-
-    // Mengambil data user beserta Employee terkait
-    const user = await User.findByPk(userId);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const userRole = req.userData?.role;
-    const ownerId = req.userData?.id as number;
-
-    // Super Admin bisa langsung menghapus user role owner
-    if (userRole === "SUPER ADMIN" && user.role === "OWNER") {
-      await user.destroy();
-      return res.status(200).json({ message: "User deleted successfully" });
-    }
-
-    const storesOwner = await Store.findAll({
-      where: { OwnerId: ownerId },
-    });
-
-    // Owner dapat menghapus user di store yang dimiliki
-    if (userRole === "OWNER" && user.role !== "OWNER" && user.role !== "SUPER ADMIN") {
-      // StoreId dari user yang ingin di hapus
-      const userStoreId = user.employee?.StoreId; // Ambil StoreId dari Employee
-      // cek,apakah user yang akan di hapus merupakan karyawan dari Owner atau bukan
-      const isOwnerOfStore = storesOwner.some(
-        (store) => store.id === userStoreId
-      );
-
-      if (!isOwnerOfStore) {
-        return res.status(403).json({ message: "Unauthorized Store" });
-      }
-
-      await user.destroy();
-      return res.status(200).json({ message: "User deleted successfully" });
-    }
-
-    // Admin dapat menghapus user role employee di store yang dikelola
-    if (userRole === "ADMIN" || userRole === 'MANAGER' && user.role !== "OWNER") {
-      const adminStoreId = req.userData?.storeId; // storeId dari authMiddleware
-      const userStoreId = user.employee?.StoreId; // Ambil StoreId dari Employee
-
-      if (adminStoreId !== userStoreId) {
-        return res.status(403).json({ message: "Unauthorized Store" });
-      }
-
-      await user.destroy();
-      return res.status(200).json({ message: "User deleted successfully" });
-    }
-
-    return res.status(403).json({ message: "Unauthorized Delete" });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/*
-// ======> SOFT DELETE <======
-// ======> TAMBAH KOLOM ISDELETED DI TABLE JIKA INGIN DIGUNAKAN <=====
-export const deleteUser = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const userId = req.params.id;
-
-    // Verifikasi hak akses
-    if (parseInt(userId) !== req.userData?.id) {
-      throw { name: 'access_denied' };
-    }
-
-    // Temukan pengguna berdasarkan ID
-    const user = await User.findByPk(userId);
-
-    // Validasi jika pengguna tidak ditemukan
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    // Tandai pengguna sebagai dihapus (penghapusan logis)
-    user.isDeleted = true;
-    await user.save();
-
-    // Kirim respons sukses
-    res.status(200).json({ message: 'User successfully marked as deleted' });
-
-  } catch (error) {
-    next(error); // Serahkan ke middleware error handler
-  }
-};
-*/
-
-export const readOne = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-  } catch (error) {
-    next(error);
-  }
-};
-
-// buat apa?
-/*
-ngambil data User, tapi untuk apa ngambil data user ini? 
-ya untuk ngambil data user yang ada di tokonya. 
-role admin, ngambil data user dengan role employee dan manager dan admin yang StoreId nya sama dengan dia
- include data attendance, data employee, data payroll nya
-role Owner, ngambil data user dengan role employee dan manager dan admin yang 
-*/

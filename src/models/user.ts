@@ -65,13 +65,13 @@ class User extends Model {
   })
   role!: UserRole;
 
-  @HasMany(() => Store, { foreignKey: "OwnerId", as: "user" })
+  @HasMany(() => Store, { foreignKey: "OwnerId" })
   stores!: Store[];
 
-  @HasOne(() => Employee, { foreignKey: "UserId", as: "employee" })
+  @HasOne(() => Employee, { foreignKey: "UserId" })
   employee!: Employee;
 
-  @HasMany(() => AuditLog, { foreignKey: "UserId", as: "auditLog" })
+  @HasMany(() => AuditLog, { foreignKey: "UserId" })
   auditLogs!: AuditLog[];
 
   @BeforeCreate

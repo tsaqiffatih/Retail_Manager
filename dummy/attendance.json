@@ -5,7 +5,17 @@
     "EmployeeId": 1
   },
   {
+    "date": "2024-08-22",
+    "status": "Present",
+    "EmployeeId": 1
+  },
+  {
     "date": "2024-07-22",
+    "status": "Present",
+    "EmployeeId": 2
+  },
+  {
+    "date": "2024-08-22",
     "status": "Present",
     "EmployeeId": 2
   },
@@ -15,7 +25,17 @@
     "EmployeeId": 3
   },
   {
+    "date": "2024-08-22",
+    "status": "Present",
+    "EmployeeId": 3
+  },
+  {
     "date": "2024-07-22",
+    "status": "Present",
+    "EmployeeId": 4
+  },
+  {
+    "date": "2024-08-22",
     "status": "Present",
     "EmployeeId": 4
   },
@@ -23,5 +43,20 @@
     "date": "2024-07-22",
     "status": "Present",
     "EmployeeId": 5
+  },
+  {
+    "date": "2024-08-22",
+    "status": "Present",
+    "EmployeeId": 5
+  },
+  {
+    "date": "2024-07-22",
+    "status": "Present",
+    "EmployeeId": 6
+  },
+  {
+    "date": "2024-07-22",
+    "status": "Present",
+    "EmployeeId": 7
   }
 ]
