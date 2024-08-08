@@ -66,17 +66,43 @@ export const editUser = async (
 ) => {
   try {
     const userId = req.params.id;
+    const userRole = req.userData?.role;
 
-    if (parseInt(userId) != req.userData?.id) {
-      throw { name: "access_denied" };
-    }
-
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(userId, {
+      include: [
+        {
+          model: Employee,
+          required: true,
+          include: [
+            {
+              model: Store,
+              required: true,
+            },
+          ],
+        },
+      ],
+    });
     if (!user) throw { name: "Not Found", param: "User" };
+
+    if (userRole == "OWNER") {
+      if (req.userData?.id !== user.employee.store.OwnerId) {
+        throw { name: "forbidden" };
+      }
+    } else if (userRole == "ADMIN" || userRole == "MANAGER") {
+      if (req.userData?.storeId !== user.employee.store.id) {
+        throw { name: "forbidden" };
+      }
+    } else if (userRole == "EMPLOYEE") {
+      if (req.userData?.id !== user.id) {
+        throw { name: "forbidden" };
+      }
+    } else {
+      throw { name: "forbidden" };
+    }
 
     await user.update(req.body);
 
-    res.status(200).json({ message: "Success update user data" });
+    res.status(200).json({ message: "Success update user data", data: user });
   } catch (error) {
     next(error);
   }
@@ -89,10 +115,23 @@ export const deleteUser = async (
   next: NextFunction
 ) => {
   try {
-    const userId = parseInt(req.params.id, 10);
+    const userId = parseInt(req.params.id);
 
     // Mengambil data user beserta Employee terkait
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(userId, {
+      include: [
+        {
+          model: Employee,
+          required: true,
+          include: [
+            {
+              model: Store,
+              required: true,
+            },
+          ],
+        },
+      ],
+    });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -107,10 +146,6 @@ export const deleteUser = async (
       return res.status(200).json({ message: "User deleted successfully" });
     }
 
-    const storesOwner = await Store.findAll({
-      where: { OwnerId: ownerId },
-    });
-
     // Owner dapat menghapus user di store yang dimiliki
     if (
       userRole === "OWNER" &&
@@ -118,13 +153,10 @@ export const deleteUser = async (
       user.role !== "SUPER ADMIN"
     ) {
       // StoreId dari user yang ingin di hapus
-      const userStoreId = user.employee?.StoreId; // Ambil StoreId dari Employee
+      const userStoreId = user.employee.store.OwnerId; // Ambil OwnerId dari Store
       // cek,apakah user yang akan di hapus merupakan karyawan dari Owner atau bukan
-      const isOwnerOfStore = storesOwner.some(
-        (store) => store.id === userStoreId
-      );
 
-      if (!isOwnerOfStore) {
+      if (req.userData?.id !== userStoreId) {
         return res.status(403).json({ message: "Unauthorized Store" });
       }
 
@@ -137,10 +169,7 @@ export const deleteUser = async (
       userRole === "ADMIN" ||
       (userRole === "MANAGER" && user.role !== "OWNER")
     ) {
-      const adminStoreId = req.userData?.storeId; // storeId dari authMiddleware
-      const userStoreId = user.employee?.StoreId; // Ambil StoreId dari Employee
-
-      if (adminStoreId !== userStoreId) {
+      if (req.userData?.storeId !== user.employee.StoreId) {
         return res.status(403).json({ message: "Unauthorized Store" });
       }
 
@@ -217,6 +246,13 @@ export const readOne = async (
       throw { name: "Not Found", param: "User" };
     }
 
+    if (user.userName == 'superAdmin') {
+      throw { name: "access_denied" };
+    }
+
+    console.log(user);
+    
+
     if (req.userData?.role == "OWNER") {
       if (req.userData?.id !== user.employee.store.OwnerId) {
         throw { name: "access_denied" };
@@ -263,7 +299,7 @@ export const readAll = async (
     const userId = req.userData?.id;
 
     // Build search condition
-    
+
     let whereCondition: any = {};
 
     if (search) {
@@ -278,13 +314,17 @@ export const readAll = async (
 
     // Additional filtering based on role
     let whereRoleCondition: any = {};
+    let isRequired: boolean = true
 
-    if (userRole === 'OWNER') {
-      whereRoleCondition = {OwnerId : userId};
-    } else if (userRole === 'ADMIN' || userRole === 'MANAGER') {
-      whereRoleCondition = {id: userStoreId};
+    if (userRole === "OWNER") {
+      whereRoleCondition = { OwnerId: userId };
+    } else if (userRole === "ADMIN" || userRole === "MANAGER") {
+      whereRoleCondition = { id: userStoreId };
+    } else if (userRole === "SUPER ADMIN") {
+      whereRoleCondition = { };
+      isRequired = false
     } else {
-      throw { name: 'access_denied' };
+      throw { name: "access_denied" };
     }
 
     // Find and count users
@@ -292,23 +332,23 @@ export const readAll = async (
       order: [[sortField, sortOrder]],
       limit: limitNumber,
       offset,
-      attributes: {exclude: ["password","role"]},
+      attributes: { exclude: ["password", "role"] },
       where: whereCondition,
       include: [
         {
           model: Employee,
-          required: true,
+          required: isRequired,
           include: [
             {
               model: Store,
               where: whereRoleCondition,
-              required: true
+              required: isRequired,
             },
             {
-              model: Attendance
+              model: Attendance,
             },
             {
-              model: Payroll
+              model: Payroll,
             },
           ],
         },
@@ -375,6 +415,10 @@ export const registeringAdmin = async (
     } = req.body;
 
     const userName = firstName + lastName;
+
+    if (role == "SUPER ADMIN" || role == "OWNER") {
+      throw { name: "invalid_role" };
+    }
 
     const user = await User.create({
       userName,
@@ -475,8 +519,3 @@ export const registeringEmployee = async (
     next(error);
   }
 };
-
-
-
-
-

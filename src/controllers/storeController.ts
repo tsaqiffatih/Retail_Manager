@@ -128,24 +128,30 @@ export const readOneStore = async (
   }
 };
 
+// belum di coba
 export const destroyStore = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const storeId = req.params.id
+    const storeId = req.params.id;
+    const userId = req.userData?.id;
 
-    const store = await Store.findByPk(storeId)
+    const store = await Store.findByPk(storeId);
 
     if (!store) {
-      throw {name: "Not Found", param: "Store"}
+      throw { name: "Not Found", param: "Store" };
     }
 
-    const employeeUserIds = store.employees.map(emp => emp.UserId);
+    if (store.OwnerId !== userId) {
+      throw { name: "access_denied" };
+    }
 
-    await store.destroy()
-    
+    const employeeUserIds = store.employees.map((emp) => emp.UserId);
+
+    await store.destroy();
+
     for (const userId of employeeUserIds) {
       const user = await User.findByPk(userId);
       if (user) {
@@ -153,33 +159,38 @@ export const destroyStore = async (
       }
     }
 
-    res.status(200).json({ message: "Store and related Users deleted successfully" });
+    res
+      .status(200)
+      .json({ message: "Store and related Users deleted successfully" });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
-export const editStore = async (req: AuthenticatedRequest,
+export const editStore = async (
+  req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction) => {
-    try {
-      const id = req.params.id
-      const userId = req.userData?.id
+  next: NextFunction
+) => {
+  try {
+    const id = req.params.id;
+    const userId = req.userData?.id;
 
-      const {name, location, category} = req.body
+    const store = await Store.findByPk(id);
 
-      const store = await Store.findByPk(id)
+    if (!store) throw { name: "Not Found", param: "Store" };
 
-      if (!store) throw { name: "Not Found", param: "Store" };
-
-      if (userId !== store.OwnerId) {
-        throw {name: "access_denied"}
-      }
-
-      await store.update(req.body);
-
-      res.status(200).json({message: "Success update store data"})
-    } catch (error) {
-      next(error)
+    if (userId !== store.OwnerId) {
+      throw { name: "access_denied" };
     }
-}
+
+    await store.update(req.body);
+
+    res.status(200).json({
+      message: "Success update store data",
+      data: store,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

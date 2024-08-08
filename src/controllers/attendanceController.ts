@@ -52,6 +52,11 @@ export const createAttendance = async (
 ) => {
   try {
     const { date, status, EmployeeId } = req.body;
+
+    if (!EmployeeId) {
+      throw {name: 'Required'}
+    }
+
     await authorizeUser(req, EmployeeId);
 
     const attendance = await Attendance.create({ date, status, EmployeeId });

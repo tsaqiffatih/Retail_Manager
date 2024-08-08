@@ -17,7 +17,15 @@ export const readOneEmployee = async (
     const { id } = req.params;
     const employee = await Employee.findOne({
       where: { id },
-      include: [Attendance, Payroll, Store, User],
+      include: [
+        { model: Attendance },
+        { model: Payroll },
+        { model: Store },
+        {
+          model: User,
+          attributes: { exclude: ["password", "role"] },
+        },
+      ],
     });
 
     if (!employee) {

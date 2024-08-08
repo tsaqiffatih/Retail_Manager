@@ -14,6 +14,16 @@ export const createPayroll = async (
   try {
     const { date, amount, status, EmployeeId } = req.body;
 
+    if (req.userData?.role == 'EMPLOYEE') {
+      throw {name: 'access_denied'}
+    }
+
+    if (!EmployeeId) {
+      throw {name: 'Required', param: 'EmployeeId'}
+    }
+
+    await authorizeUser(req,EmployeeId)
+
     const payroll = await Payroll.create({ date, amount, status, EmployeeId });
     res.status(201).json({
       message: "Payroll recorded successfully",
@@ -23,46 +33,6 @@ export const createPayroll = async (
     next(error);
   }
 };
-
-// Mengambil semua data gaji, dengan opsi filter berdasarkan EmployeeId dan rentang tanggal.
-// data sesuai sama user yang sedangn login || data sesuai sama storeId nya
-/*
-export const readAllPayrolls = async (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { EmployeeId, startDate, endDate } = req.query;
-    let whereCondition: any = {};
-
-    if (EmployeeId) {
-      whereCondition.EmployeeId = EmployeeId;
-    }
-
-    if (startDate && endDate) {
-      whereCondition.date = {
-        [Op.between]: [
-          new Date(startDate as string),
-          new Date(endDate as string),
-        ],
-      };
-    }
-
-    const payrolls = await Payroll.findAll({
-      where: whereCondition,
-      include: [Employee],
-    });
-
-    res.status(200).json({
-      message: "Payrolls retrieved successfully",
-      data: payrolls,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-*/
 
 // Mengambil data gaji satu karyawan berdasarkan ID.
 export const readOnePayroll = async (
@@ -139,9 +109,49 @@ export const deletePayroll = async (
   }
 };
 
+// Mengambil semua data gaji, dengan opsi filter berdasarkan EmployeeId dan rentang tanggal.
+// data sesuai sama user yang sedangn login || data sesuai sama storeId nya
+// /*
+export const readAllPayrolls = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { EmployeeId, startDate, endDate } = req.query;
+    let whereCondition: any = {};
+
+    if (EmployeeId) {
+      whereCondition.EmployeeId = EmployeeId;
+    }
+
+    if (startDate && endDate) {
+      whereCondition.date = {
+        [Op.between]: [
+          new Date(startDate as string),
+          new Date(endDate as string),
+        ],
+      };
+    }
+
+    const payrolls = await Payroll.findAll({
+      where: whereCondition,
+      include: [Employee],
+    });
+
+    res.status(200).json({
+      message: "Payrolls retrieved successfully",
+      data: payrolls,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+// */
+
 //Menghasilkan laporan gaji.
 // data sesuai sama user yang sedangn login || data sesuai sama storeId nya
-/*
+// /*
 export const generatePayrollReport = async (
   req: AuthenticatedRequest,
   res: Response,
@@ -182,4 +192,4 @@ export const generatePayrollReport = async (
     next(error);
   }
 };
-*/
+// */

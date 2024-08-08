@@ -69,6 +69,9 @@ const errorHandler = (err: CustomError, req: Request, res: Response, next: NextF
     } else if (name === 'Invalid Action Type') {
         status = 400;
         message = "Invalid Action Type";
+    } else if (name === 'invalid_role') {
+        status = 400;
+        message = "Please, choose other role for user";
     } else {
         console.log(err);
         
