@@ -1,10 +1,9 @@
 import express from "express";
-import {  } from "../controllers/attendanceController";
+import {  } from "../controllers/employeeController";
 import { auditMiddleware } from "../middleware/auditMiddleware";
 const router = express.Router();
 
-
-router.use(auditMiddleware("Attendance"));
+router.use(auditMiddleware("Employee"));
 
 router.get("/:id", )
 

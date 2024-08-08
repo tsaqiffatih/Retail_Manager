@@ -4,6 +4,8 @@ import Employee from "../models/employee";
 import Attendance from "../models/attendance";
 import Payroll from "../models/payroll";
 import Store from "../models/store";
+import User from "../models/user";
+import { authorizeUser } from "./attendanceController";
 
 // Mengambil detail satu karyawan berdasarkan ID.
 export const readOneEmployee = async (
@@ -15,14 +17,16 @@ export const readOneEmployee = async (
     const { id } = req.params;
     const employee = await Employee.findOne({
       where: { id },
-      include: [Attendance, Payroll, Store],
+      include: [Attendance, Payroll, Store, User],
     });
 
     if (!employee) {
-      return res.status(404).json({ message: "Employee not found" });
+      throw { name: "Not Found", param: "Employee" };
     }
 
-    res.status(200).json(employee);
+    await authorizeUser(req, employee.id);
+
+    res.status(200).json({ message: "success", data: employee });
   } catch (error) {
     next(error);
   }
@@ -43,10 +47,13 @@ export const editEmployee = async (
       return res.status(404).json({ message: "Employee not found" });
     }
 
+    await authorizeUser(req, employee.id);
+
     await employee.update(updatedData);
-    res
-      .status(200)
-      .json({ message: "Employee updated successfully", data: employee });
+    res.status(200).json({
+      message: "Employee updated successfully",
+      data: employee,
+    });
   } catch (error) {
     next(error);
   }
