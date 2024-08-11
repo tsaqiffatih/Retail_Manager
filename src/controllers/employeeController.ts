@@ -50,6 +50,14 @@ export const editEmployee = async (
     const { id } = req.params;
     const updatedData = req.body;
 
+    const protectedFields = ['StoreId', 'UserId'];
+
+    for (const field of protectedFields) {
+      if (field in updatedData) {
+        delete updatedData[field];
+      }
+    }
+
     const employee = await Employee.findByPk(id);
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });

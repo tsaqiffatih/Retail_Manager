@@ -7,7 +7,7 @@ const router = express.Router();
 router.use(authentication)
 router.use(auditMiddleware("Attendance"));
 
-router.get("/:id", )
+// router.get("/:id", )
 // Route untuk membuat data absensi
 router.post("/", createAttendance);
 
