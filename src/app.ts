@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import router  from './routers'
 import errorHandler from './middleware/errorHandler'
 import sequelizeConnection from './config/connection'
+import swaggerDocs from './config/swagger'
 
 dotenv.config()
 
