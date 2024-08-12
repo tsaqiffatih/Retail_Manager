@@ -13,17 +13,12 @@ export const auditMiddleware = (entityName: string) => {
     res: Response,
     next: NextFunction
   ) => {
-    const action = determineAction(req.method);
+    const action = determineAction(req.method, req.params.id);
     const UserId = req.userData?.id;
     const timestamp = new Date();
 
     let previous_data: any = null;
     let new_data: any = null;
-
-    if (action === "READ") {
-      next();
-      return;
-    }
 
     if (action === "DELETE" || action === "UPDATE" || action === "READ ONE") {
       previous_data = await getPreviousData(entityName, req.params.id);
@@ -52,13 +47,14 @@ export const auditMiddleware = (entityName: string) => {
 };
 
 const determineAction = (
-  method: string
+  method: string,
+  entityId: string | undefined
 ): "CREATE" | "READ" | "DELETE" | "UPDATE" | "READ ONE" => {
   switch (method) {
     case "POST":
       return "CREATE";
     case "GET":
-      return "READ";
+      return entityId ? "READ ONE" : "READ";
     case "DELETE":
       return "DELETE";
     case "PUT":

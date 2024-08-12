@@ -6,7 +6,6 @@ import Employee from "../models/employee";
 import { AuthenticatedRequest } from "../middleware/authMiddleware";
 import Store from "../models/store";
 import { Op } from "sequelize";
-import AuditLog from "../models/auditlog";
 import Attendance from "../models/attendance";
 import Payroll from "../models/payroll";
 
