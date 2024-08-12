@@ -3,6 +3,15 @@
 ```plaintext
 RETAIL_MANAGER/
 │
+├── docs/
+│   └── swagger
+│        ├── attendance.yaml
+│        ├── employee.yaml
+│        ├── index.yaml
+│        ├── payroll.yaml
+│        ├── store.yaml
+│        └── user.yaml
+│
 ├── dummy/
 │   ├── attendance.json
 │   ├── auditLog.json

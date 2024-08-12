@@ -4,7 +4,7 @@ import dotenv from 'dotenv'
 import router  from './routers'
 import errorHandler from './middleware/errorHandler'
 import sequelizeConnection from './config/connection'
-import swaggerDocs from './config/swagger'
+import { swaggerSpec, swaggerUi } from './config/swagger'
 
 dotenv.config()
 
@@ -15,6 +15,7 @@ const appName = process.env.APP_NAME
 app.use(cors())
 app.use(express.json());
 app.use("/api", router)
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(errorHandler)
 
 app.get('/api/users', (req:Request, res:Response) => {

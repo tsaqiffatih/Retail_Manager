@@ -1,0 +1,19 @@
+# docs/swagger/index.yaml
+openapi: '3.0.0'
+info:
+  title: 'Retail Manager API'
+  version: '1.0.0'
+  description: 'API documentation for the Retail Manager application'
+servers:
+  - url: 'http://localhost:3000'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    $ref: './user.yaml#/components/schemas/User'
+
+paths:
+  $ref: './user.yaml#/paths'
