@@ -6,6 +6,8 @@ admin 1 :
     => Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluMUBtYWlsLmNvbSIsInVzZXJuYW1lIjoiYWRtaW4xIiwiaWF0IjoxNzIzNDM5NDUwfQ.PJM4AG3EMP3qn6tH5ShP20hLbuwbc6bQ_DK15_oIbEc
 manager 1 :
     => Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1hbmFnZXIxQG1haWwuY29tIiwidXNlcm5hbWUiOiJtYW5hZ2VyMSIsImlhdCI6MTcyMzQzOTUzMX0.DPJrNUov4zSA3cVNr7zoKumH1In0RcXbzuAfbHZ3L0M
+manager 1.2 :
+    => Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1hbmFnZXIyQG1haWwuY29tIiwidXNlcm5hbWUiOiJtYW5hZ2VyMiIsImlhdCI6MTcyMzQ0MDIyNH0.qhXvkmbPxs2CKT33ZEQGvmsMVYTB3J4YPkh0ON5fURo
 employee 1 :
     => Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImVtcGxveWVlMUBtYWlsLmNvbSIsInVzZXJuYW1lIjoiZW1wbG95ZWUxIiwiaWF0IjoxNzIzNDM5NTYyfQ.TjZPEb4dDXp1IQF4-3olmTBFz0o_y6tz-yCZRUuZirQ
 owner 2 : 
@@ -14,3 +16,6 @@ admin 2 :
     => Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQm9zczIxQG1haWwuY29tIiwidXNlcm5hbWUiOiJhZG1pbkJvc3MyMSIsImlhdCI6MTcyMzQzOTY0N30.h9fyhtz_rLVs5GekZKF5l1tumib4DnTVSkN-9CY9E9o
 manager 2 :
     => Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1hbmFnZXJCb3NzMjFAbWFpbC5jb20iLCJ1c2VybmFtZSI6Im1hbmFnZXJCb3NzMjEiLCJpYXQiOjE3MjM0Mzk2NzJ9.fPO5rETIoM8F_iLcAjlYItiX1dUilhiyS_hzaRv67GY
+
+
+note: node-cron (for automatitation scheduler in attendance)
