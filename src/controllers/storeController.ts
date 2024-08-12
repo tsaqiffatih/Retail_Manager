@@ -38,7 +38,14 @@ export const readAll = async (
       include: [
         {
           model: Employee,
-          include: [{ model: Payroll }, { model: Attendance }],
+          include: [
+            { model: Payroll },
+            { model: Attendance },
+            {
+              model: User,
+              attributes: { exclude: ["password"] },
+            },
+          ],
         },
       ],
       where: {},
@@ -148,16 +155,16 @@ export const destroyStore = async (
       throw { name: "access_denied" };
     }
 
-    const employeeUserIds = store.employees.map((emp) => emp.UserId);
+    // const employeeUserIds = store.employees.map((emp) => emp.UserId);
 
     await store.destroy();
 
-    for (const userId of employeeUserIds) {
-      const user = await User.findByPk(userId);
-      if (user) {
-        await user.destroy();
-      }
-    }
+    // for (const userId of employeeUserIds) {
+    //   const user = await User.findByPk(userId);
+    //   if (user) {
+    //     await user.destroy();
+    //   }
+    // }
 
     res
       .status(200)

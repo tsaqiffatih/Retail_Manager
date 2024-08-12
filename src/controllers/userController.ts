@@ -6,7 +6,6 @@ import Employee from "../models/employee";
 import { AuthenticatedRequest } from "../middleware/authMiddleware";
 import Store from "../models/store";
 import { Op } from "sequelize";
-import AuditLog from "../models/auditlog";
 import Attendance from "../models/attendance";
 import Payroll from "../models/payroll";
 
@@ -30,7 +29,7 @@ export const login = async (
       email: instance.email,
       username: instance.userName,
     });
-    res.status(200).json({ data: access_token });
+    res.status(200).json({ access_token: access_token });
   } catch (error) {
     // console.log(error);
     next(error);
@@ -72,11 +71,9 @@ export const editUser = async (
       include: [
         {
           model: Employee,
-          required: true,
           include: [
             {
               model: Store,
-              required: true,
             },
           ],
         },
@@ -85,15 +82,19 @@ export const editUser = async (
     if (!user) throw { name: "Not Found", param: "User" };
 
     if (userRole == "OWNER") {
-      if (req.userData?.id !== user.employee.store.OwnerId) {
+      if (
+        req.userData?.id === user?.employee?.store?.OwnerId ||
+        req.userData?.id === user.id
+      ) {
+      } else {
         throw { name: "forbidden" };
       }
     } else if (userRole == "ADMIN" || userRole == "MANAGER") {
-      if (req.userData?.storeId !== user.employee.store.id) {
+      if (req.userData?.storeId !== user?.employee?.store?.id) {
         throw { name: "forbidden" };
       }
     } else if (userRole == "EMPLOYEE") {
-      if (req.userData?.id !== user.id) {
+      if (req.userData?.id !== user?.id) {
         throw { name: "forbidden" };
       }
     } else {
@@ -102,7 +103,12 @@ export const editUser = async (
 
     await user.update(req.body);
 
-    res.status(200).json({ message: "Success update user data", data: user });
+    const userResponse = user.get({ plain: true });
+    delete userResponse.password;
+
+    res
+      .status(200)
+      .json({ message: "Success update user data", data: userResponse });
   } catch (error) {
     next(error);
   }
@@ -246,22 +252,19 @@ export const readOne = async (
       throw { name: "Not Found", param: "User" };
     }
 
-    if (user.userName == 'superAdmin') {
+    if (user.userName == "superAdmin") {
       throw { name: "access_denied" };
     }
 
-    console.log(user);
-    
-
     if (req.userData?.role == "OWNER") {
-      if (req.userData?.id !== user.employee.store.OwnerId) {
+      if (req.userData?.id !== user?.employee?.store?.OwnerId) {
         throw { name: "access_denied" };
       }
     } else if (
       req.userData?.role == "ADMIN" ||
       req.userData?.role == "MANAGER"
     ) {
-      if (user?.employee.StoreId !== req.userData?.storeId) {
+      if (user?.employee?.StoreId !== req.userData?.storeId) {
         throw { name: "access_denied" };
       }
     } else if (req.userData?.role == "EMPLOYEE") {
@@ -314,15 +317,15 @@ export const readAll = async (
 
     // Additional filtering based on role
     let whereRoleCondition: any = {};
-    let isRequired: boolean = true
+    let isRequired: boolean = true;
 
     if (userRole === "OWNER") {
       whereRoleCondition = { OwnerId: userId };
     } else if (userRole === "ADMIN" || userRole === "MANAGER") {
       whereRoleCondition = { id: userStoreId };
     } else if (userRole === "SUPER ADMIN") {
-      whereRoleCondition = { };
-      isRequired = false
+      whereRoleCondition = {};
+      isRequired = false;
     } else {
       throw { name: "access_denied" };
     }
