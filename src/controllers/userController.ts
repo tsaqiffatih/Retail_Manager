@@ -250,18 +250,15 @@ export const readOne = async (
       throw { name: "access_denied" };
     }
 
-    console.log(user);
-    
-
     if (req.userData?.role == "OWNER") {
-      if (req.userData?.id !== user.employee.store.OwnerId) {
+      if (req.userData?.id !== user?.employee?.store?.OwnerId) {
         throw { name: "access_denied" };
       }
     } else if (
       req.userData?.role == "ADMIN" ||
       req.userData?.role == "MANAGER"
     ) {
-      if (user?.employee.StoreId !== req.userData?.storeId) {
+      if (user?.employee?.StoreId !== req.userData?.storeId) {
         throw { name: "access_denied" };
       }
     } else if (req.userData?.role == "EMPLOYEE") {
