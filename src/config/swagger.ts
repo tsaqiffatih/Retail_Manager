@@ -1,22 +1,14 @@
-import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
 
-const swaggerOptions = {
-  swaggerDefinition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'Retail Manager API',
-      version: '1.0.0',
-      description: 'API documentation for the Retail Manager',
-    },
-    servers: [
-      {
-        url: 'http://localhost:3000', 
-      },
-    ],
-  },
-  apis: ['./routers/*.ts', './controllers/*.ts'], // Sesuaikan dengan path file TS kamu
+const swaggerDocument = YAML.load('./docs/swagger/index.yaml');
+
+const options = {
+  definition: swaggerDocument,
+  apis: ['./src/routers/*.ts', './src/models/*.ts'],
 };
 
-const swaggerDocs = swaggerJSDoc(swaggerOptions);
+const swaggerSpec = swaggerJsdoc(options);
 
-export default swaggerDocs;
+export { swaggerUi, swaggerSpec };
