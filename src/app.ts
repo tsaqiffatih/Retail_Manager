@@ -9,6 +9,7 @@ import {
   schedulePayrollCreation,
   schedulePayrollUpdate,
 } from "./schedulers/payrollScheduler";
+import { scheduleAttendanceCreation } from "./schedulers/attendanceScheduler";
 
 dotenv.config();
 
@@ -48,6 +49,7 @@ export const server = app.listen(port, () => {
       console.log("Database synced successfully.");
       schedulePayrollCreation();
       schedulePayrollUpdate();
+      scheduleAttendanceCreation()
     })
     .catch((err) => {
       console.error("Error syncing database:", err);
