@@ -16,24 +16,26 @@ export const authorizeUser = async (req: AuthenticatedRequest, EmployeeId: numbe
     include: [
       {
         model: Employee,
-        required: true,
         where: { id: EmployeeId },
         include: [
           {
             model: Store,
-            required: true,
           },
         ],
       },
     ],
   });
 
+  console.log(user?.employee?.store?.id,"employee<<<<<<<");
+  console.log(userId,"userLogin<<<<<<<");
+  console.log(storeId,"userLoginStoreId<<<<<<<");
+  
   if (userRole === "OWNER") {
-    if (userId !== user?.employee.store.id) {
+    if (userId !== user?.employee?.store?.OwnerId) {
       throw { name: "access_denied" };
     }
   } else if (userRole === "ADMIN" || userRole === "MANAGER") {
-    if (storeId !== user?.employee.StoreId) {
+    if (storeId !== user?.employee?.StoreId) {
       throw { name: "access_denied" };
     }
   } else if (userRole === "EMPLOYEE") {

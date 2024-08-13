@@ -40,7 +40,7 @@ export const readOneEmployee = async (
   }
 };
 
-// Mengedit detail karyawan.
+// Mengedit data detail Employee (yang merupakan data pelengkap entitas user).
 export const editEmployee = async (
   req: AuthenticatedRequest,
   res: Response,
@@ -50,17 +50,17 @@ export const editEmployee = async (
     const { id } = req.params;
     const updatedData = req.body;
 
-    const protectedFields = ['StoreId', 'UserId'];
+    const protectedFields = ["StoreId", "UserId"];
 
     for (const field of protectedFields) {
       if (field in updatedData) {
-        delete updatedData[field];
+        throw { name: "protected_field", param: field };
       }
     }
 
     const employee = await Employee.findByPk(id);
     if (!employee) {
-      return res.status(404).json({ message: "Employee not found" });
+      throw { name: "Not Found", param: "Employee" };
     }
 
     await authorizeUser(req, employee.id);

@@ -145,7 +145,13 @@ export const destroyStore = async (
     const storeId = req.params.id;
     const userId = req.userData?.id;
 
-    const store = await Store.findByPk(storeId);
+    const store = await Store.findByPk(storeId, {
+      include: [
+        {
+          model: Employee,
+        },
+      ],
+    });
 
     if (!store) {
       throw { name: "Not Found", param: "Store" };
@@ -155,20 +161,20 @@ export const destroyStore = async (
       throw { name: "access_denied" };
     }
 
-    // const employeeUserIds = store.employees.map((emp) => emp.UserId);
+    const employeeUserIds = store.employees.map((emp) => emp.UserId);
 
     await store.destroy();
 
-    // for (const userId of employeeUserIds) {
-    //   const user = await User.findByPk(userId);
-    //   if (user) {
-    //     await user.destroy();
-    //   }
-    // }
+    for (const userId of employeeUserIds) {
+      const user = await User.findByPk(userId);
+      if (user) {
+        await user.destroy();
+      }
+    }
 
-    res
-      .status(200)
-      .json({ message: "Store and related Users deleted successfully" });
+    res.status(200).json({
+      message: "Store and related Users deleted successfully",
+    });
   } catch (error) {
     next(error);
   }
