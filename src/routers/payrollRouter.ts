@@ -25,4 +25,5 @@ router.delete("/:id", deletePayroll);
 // Route untuk menghasilkan laporan gaji (opsional)
 // router.get("/payroll/report", generatePayrollReport);
 
+
 export default router
