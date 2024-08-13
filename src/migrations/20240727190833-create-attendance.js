@@ -15,7 +15,8 @@ module.exports = {
       },
       status: {
         type: Sequelize.ENUM(['Present', 'Absent', 'Sick', 'Leave']),
-        allowNull:false
+        allowNull:false,
+        defaultValue: 'Absent'
       },
       EmployeeId: {
         type: Sequelize.INTEGER,
