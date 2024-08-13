@@ -21,8 +21,7 @@ router.get(
   readOneStore
 );
 
-// delete store include employee and user who associated wiht employee
-router.delete("/:id", authorizeRole("OWNER"), destroyStore); // masih belum clean
-// belum clean untuk delete, karna entitas usernya gak ikut kehapus juga. nanti jadi pr bingung
+// delete store include employee and user,payroll,attendance who associated wiht employee
+router.delete("/:id", authorizeRole("OWNER"),auditMiddleware("Store"), destroyStore); 
 
 export default router;

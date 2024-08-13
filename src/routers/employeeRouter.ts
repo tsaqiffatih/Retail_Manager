@@ -5,10 +5,9 @@ import { authentication } from "../middleware/authMiddleware";
 const router = express.Router();
 
 router.use(authentication)
-router.use(auditMiddleware("Employee"));
 
-router.get("/:id", readOneEmployee)
-router.patch("/:id", editEmployee)
+router.get("/:id", auditMiddleware("Employee"),readOneEmployee)
+router.patch("/:id",auditMiddleware("Employee"), editEmployee)
 
 
 export default router

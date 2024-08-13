@@ -20,10 +20,18 @@ export const auditMiddleware = (entityName: string) => {
     let previous_data: any = null;
     let new_data: any = null;
 
-    if (action === "DELETE" || action === "UPDATE" || action === "READ ONE") {
-      previous_data = await getPreviousData(entityName, req.params.id);
+    if (req.params.id && isNaN(Number(req.params.id))) {
+      return res.status(400).json({
+        message: "Invalid ID parameter, it must be a number",
+      });
     }
 
+    if (action === "DELETE" || action === "UPDATE" || action === "READ ONE") {
+      if(req.params.id) {
+        previous_data = await getPreviousData(entityName, req.params.id);
+      }
+    }
+    
     res.on("finish", async () => {
       if (action === "CREATE" || action === "UPDATE") {
         new_data = req.body;
@@ -70,19 +78,19 @@ const getPreviousData = async (entityName: string, entityId: string) => {
 
   switch (entityName) {
     case "User":
-      previousData = await User.findByPk(entityId);
+      previousData = await User.findByPk(parseInt(entityId));
       break;
     case "Employee":
-      previousData = await Employee.findByPk(entityId);
+      previousData = await Employee.findByPk(parseInt(entityId));
       break;
     case "Store":
-      previousData = await Store.findByPk(entityId);
+      previousData = await Store.findByPk(parseInt(entityId));
       break;
     case "Payroll":
-      previousData = await Payroll.findByPk(entityId);
+      previousData = await Payroll.findByPk(parseInt(entityId));
       break;
     case "Attendance":
-      previousData = await Attendance.findByPk(entityId);
+      previousData = await Attendance.findByPk(parseInt(entityId));
       break;
     default:
       throw new Error(`Entity ${entityName} not recognized`);

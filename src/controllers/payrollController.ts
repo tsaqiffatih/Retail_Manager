@@ -14,10 +14,6 @@ export const createPayroll = async (
   try {
     const { date, amount, status, EmployeeId } = req.body;
 
-    if (req.userData?.role == 'EMPLOYEE') {
-      throw {name: 'access_denied'}
-    }
-
     if (!EmployeeId) {
       throw {name: 'Required', param: 'EmployeeId'}
     }
