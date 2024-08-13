@@ -1,26 +1,30 @@
-import express, { NextFunction, Request, Response } from 'express'
-import cors from 'cors'
-import dotenv from 'dotenv'
-import router  from './routers'
-import errorHandler from './middleware/errorHandler'
-import sequelizeConnection from './config/connection'
-import { swaggerSpec, swaggerUi } from './config/swagger'
+import express, { NextFunction, Request, Response } from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import router from "./routers";
+import errorHandler from "./middleware/errorHandler";
+import sequelizeConnection from "./config/connection";
+import { swaggerSpec, swaggerUi } from "./config/swagger";
+import {
+  schedulePayrollCreation,
+  schedulePayrollUpdate,
+} from "./schedulers/payrollScheduler";
 
-dotenv.config()
+dotenv.config();
 
-const app = express()
-const port = process.env.APP_PORT
-const appName = process.env.APP_NAME
+const app = express();
+const port = process.env.APP_PORT;
+const appName = process.env.APP_NAME;
 
-app.use(cors())
+app.use(cors());
 app.use(express.json());
-app.use("/api", router)
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.use(errorHandler)
+app.use("/api", router);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use(errorHandler);
 
-app.get('/api/users', (req:Request, res:Response) => {
-  res.send('Hello World!')
-})
+app.get("/api/users", (req: Request, res: Response) => {
+  res.send("Hello World!");
+});
 
 // export const server = app.listen(port, () => {
 //   console.log(`Example app for ${appName} listening on port ${port}`)
@@ -38,14 +42,16 @@ app.get('/api/users', (req:Request, res:Response) => {
 
 export const server = app.listen(port, () => {
   console.log(`Example app for ${appName} listening on port ${port}`);
-  sequelizeConnection.sync()
+  sequelizeConnection
+    .sync()
     .then(() => {
-      console.log('Database synced successfully.');
+      console.log("Database synced successfully.");
+      schedulePayrollCreation();
+      schedulePayrollUpdate();
     })
     .catch((err) => {
-      console.error('Error syncing database:', err);
+      console.error("Error syncing database:", err);
     });
 });
-
 
 export default app;
