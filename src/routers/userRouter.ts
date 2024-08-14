@@ -39,5 +39,5 @@ router.delete(
   auditMiddleware("User"),
   deleteUser
 );
-
+ 
 export default router;
