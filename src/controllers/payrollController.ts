@@ -4,6 +4,12 @@ import Payroll from "../models/payroll";
 import { Op } from "sequelize";
 import Employee from "../models/employee";
 import { authorizeUser } from "./attendanceController";
+import { createDailyAttendance } from "../schedulers/attendanceScheduler";
+import {
+  createMonthlyPayroll,
+  updatePayrollAmounts,
+} from "../schedulers/payrollScheduler";
+import Attendance from "../models/attendance";
 
 // Merekam data gaji untuk karyawan.
 export const createPayroll = async (
@@ -15,10 +21,10 @@ export const createPayroll = async (
     const { date, amount, status, EmployeeId } = req.body;
 
     if (!EmployeeId) {
-      throw {name: 'Required', param: 'EmployeeId'}
+      throw { name: "Required", param: "EmployeeId" };
     }
 
-    await authorizeUser(req,EmployeeId)
+    await authorizeUser(req, EmployeeId);
 
     const payroll = await Payroll.create({ date, amount, status, EmployeeId });
     res.status(201).json({
@@ -106,7 +112,9 @@ export const deletePayroll = async (
 };
 
 // Mengambil semua data gaji, dengan opsi filter berdasarkan EmployeeId dan rentang tanggal.
-// data sesuai sama user yang sedangn login || data sesuai sama storeId nya
+// jika Employee data sesuai sama user yang sedangn login 
+// jika Manager/Admin data sesuai sama storeId nya
+// jika Owner data yang store.OwnerId nya sama dengan dia
 // /*
 export const readAllPayrolls = async (
   req: AuthenticatedRequest,
@@ -189,3 +197,45 @@ export const generatePayrollReport = async (
   }
 };
 // */
+
+/*
+export const testingScheduler = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    console.log("start testing schedule");
+
+    // Mengukur waktu untuk createDailyAttendance
+    console.time("createDailyAttendance");
+    await createDailyAttendance();
+    console.timeEnd("createDailyAttendance"); //38.861ms, 39.682ms
+    console.log("success createDailyAttendance<<<<<<<<<<<<<");
+    
+    // Mengukur waktu untuk createMonthlyPayroll
+    console.time("createMonthlyPayroll");
+    await createMonthlyPayroll();
+    console.timeEnd("createMonthlyPayroll"); //9.143ms, 11.998ms
+    console.log("success createMonthlyPayroll<<<<<<<<<<<<<");
+
+    // Mengukur waktu untuk updatePayrollAmounts
+    console.time("updatePayrollAmounts");
+    await updatePayrollAmounts();
+    console.timeEnd("updatePayrollAmounts"); //68.89ms,119.871ms
+    console.log("success updatePayrollAmounts<<<<<<<<<<<<<");
+
+    const payrollData = await Payroll.findAll();
+    const attendanceData = await Attendance.findAll();
+    res
+      .status(200)
+      .json({
+        message: "success",
+        dataPayroll: payrollData,
+        dataAttendance: attendanceData,
+      });
+  } catch (error) {
+    console.log(error);
+  }
+};
+*/

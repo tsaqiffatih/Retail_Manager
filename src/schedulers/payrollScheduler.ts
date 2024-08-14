@@ -109,7 +109,7 @@ export const updatePayrollAmounts = async () => {
 
 /*
  pr:
- => ganti zona waktu penyimpanan ke format UTC
+ => ganti zona waktu penyimpanan ke format UTC => gak perlu
  => cek scheduler udah berhasil atau belum
  => urutan cek scheduler nya:
     ==> scheduleAttendanceCreation(createDailyAttendance) -> schedulePayrollCreation(createMonthlyPayroll) -> schedulePayrollUpdate(updatePayrollAmounts)

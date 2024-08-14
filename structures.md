@@ -76,6 +76,10 @@ RETAIL_MANAGER/
 │   │   ├── storeRouter.ts
 │   │   └── userRouter.ts
 │   │
+│   ├── schedulers/
+│   │   ├── attendanceScheduler.ts
+│   │   └── payrollScheduler.ts
+│   │
 │   ├── seeders/
 │   │   ├── 20240727195928-user-seed-initial.js
 │   │   ├── 20240727195940-store-seed-initial.js
