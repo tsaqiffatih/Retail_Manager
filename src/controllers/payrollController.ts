@@ -10,6 +10,7 @@ import {
   updatePayrollAmounts,
 } from "../schedulers/payrollScheduler";
 import Attendance from "../models/attendance";
+import Store from "../models/store";
 
 // Merekam data gaji untuk karyawan.
 export const createPayroll = async (
@@ -112,7 +113,7 @@ export const deletePayroll = async (
 };
 
 // Mengambil semua data gaji, dengan opsi filter berdasarkan EmployeeId dan rentang tanggal.
-// jika Employee data sesuai sama user yang sedangn login 
+// jika Employee data sesuai sama user yang sedangn login
 // jika Manager/Admin data sesuai sama storeId nya
 // jika Owner data yang store.OwnerId nya sama dengan dia
 // /*
@@ -155,6 +156,7 @@ export const readAllPayrolls = async (
 
 //Menghasilkan laporan gaji.
 // data sesuai sama user yang sedangn login || data sesuai sama storeId nya
+// GET /api/payrolls/report?startDate=2024-08-01&endDate=2024-08-31&status=PAID
 // /*
 export const generatePayrollReport = async (
   req: AuthenticatedRequest,
@@ -162,11 +164,30 @@ export const generatePayrollReport = async (
   next: NextFunction
 ) => {
   try {
-    const { startDate, endDate, EmployeeId } = req.query;
+    const { startDate, endDate, EmployeeId, status } = req.query;
+
+    // Get the current user's role and storeId if applicable
+    const userRole = req.userData?.role;
+    const userStoreId = req.userData?.storeId;
+    const userId = req.userData?.id;
+
+    // Validasi status
+    const validStatuses = ["PAID", "UNPAID"];
+    if (status && !validStatuses.includes(status as string)) {
+      return res
+        .status(400)
+        .json({
+          message: "Invalid status value. Allowed values are PAID or UNPAID.",
+        });
+    }
 
     let whereCondition: any = {};
-    if (EmployeeId) {
+
+    // Filter by EmployeeId, only allow if the role is not EMPLOYEE
+    if (EmployeeId && userRole !== "EMPLOYEE") {
       whereCondition.EmployeeId = EmployeeId;
+    } else if (userRole === "EMPLOYEE") {
+      whereCondition.EmployeeId = userId;
     }
 
     if (startDate && endDate) {
@@ -178,10 +199,42 @@ export const generatePayrollReport = async (
       };
     }
 
-    const payrollReport = await Payroll.findAll({
+    // Filter by status if provided
+    if (status) {
+      whereCondition.status = status as string;
+    }
+
+    // Additional filtering based on role
+    let whereRoleCondition: any = {};
+    let isRequired: boolean = true;
+
+    if (userRole === "OWNER") {
+      whereRoleCondition = { OwnerId: userId };
+    } else if (userRole === "ADMIN" || userRole === "MANAGER") {
+      whereRoleCondition = { id: userStoreId };
+    } else if (userRole === "SUPER ADMIN") {
+      whereRoleCondition = {};
+      isRequired = false;
+    } else {
+      throw { name: "access_denied" };
+    }
+
+    const {rows: payrollReport, count} = await Payroll.findAndCountAll({
       where: whereCondition,
       order: [["date", "ASC"]],
-      include: [Employee],
+      include: [
+        {
+          model: Employee,
+          required: isRequired,
+          include: [
+            {
+              model: Store,
+              where: whereRoleCondition,
+              required: isRequired,
+            },
+          ],
+        },
+      ],
     });
 
     if (!payrollReport.length) {
@@ -191,6 +244,7 @@ export const generatePayrollReport = async (
     res.status(200).json({
       message: "Payroll report generated successfully",
       data: payrollReport,
+      totalItems: count
     });
   } catch (error) {
     next(error);

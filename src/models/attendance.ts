@@ -8,7 +8,7 @@ import {
 } from "sequelize-typescript";
 import Employee from "./employee";
 
-type StatusType = "Present" | "Absent" | "Sick" | "Leave";
+export type StatusType = "Present" | "Absent" | "Sick" | "Leave";
 
 @Table
 class Attendance extends Model {
