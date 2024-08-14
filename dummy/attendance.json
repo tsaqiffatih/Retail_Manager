@@ -1,61 +1,71 @@
 [
   {
-    "date": "2024-07-22",
+    "date": "2024-08-22",
+    "status": "Present",
+    "EmployeeId": 1
+  },
+  {
+    "date": "2024-08-23",
     "status": "Absent",
     "EmployeeId": 1
   },
   {
     "date": "2024-08-22",
-    "status": "Absent",
-    "EmployeeId": 1
+    "status": "Present",
+    "EmployeeId": 2
   },
   {
-    "date": "2024-07-22",
+    "date": "2024-08-23",
     "status": "Absent",
     "EmployeeId": 2
   },
   {
     "date": "2024-08-22",
-    "status": "Absent",
-    "EmployeeId": 2
+    "status": "Present",
+    "EmployeeId": 3
   },
   {
-    "date": "2024-07-22",
+    "date": "2024-08-23",
     "status": "Absent",
     "EmployeeId": 3
   },
   {
     "date": "2024-08-22",
-    "status": "Absent",
-    "EmployeeId": 3
+    "status": "Present",
+    "EmployeeId": 4
   },
   {
-    "date": "2024-07-22",
+    "date": "2024-08-23",
     "status": "Absent",
     "EmployeeId": 4
   },
   {
     "date": "2024-08-22",
-    "status": "Absent",
-    "EmployeeId": 4
+    "status": "Present",
+    "EmployeeId": 5
   },
   {
-    "date": "2024-07-22",
+    "date": "2024-08-23",
     "status": "Absent",
     "EmployeeId": 5
   },
   {
     "date": "2024-08-22",
-    "status": "Absent",
-    "EmployeeId": 5
+    "status": "Present",
+    "EmployeeId": 6
   },
   {
-    "date": "2024-07-22",
+    "date": "2024-08-23",
     "status": "Absent",
     "EmployeeId": 6
   },
   {
-    "date": "2024-07-22",
+    "date": "2024-08-22",
+    "status": "Present",
+    "EmployeeId": 7
+  },
+  {
+    "date": "2024-08-23",
     "status": "Absent",
     "EmployeeId": 7
   }

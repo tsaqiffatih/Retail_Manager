@@ -96,3 +96,11 @@ note: "SUPER ADMIN" tidak punya akses.
     => role "OWNER" hanya bisa generateAttendanceReport yang berada di store mliknya
     => role "ADMIN" & "MANAGER" hanya bisa generateAttendanceReport yang toko nya sama dengan dia
     => role "EMPLOYEE" hanya bisa generateAttendanceReport miliknya sendiri
+
+
+=> perlu ngirim:
+    controller nya
+    router nya
+    output setiap endpoint nya
+    errorHandler nya
+    model nya
