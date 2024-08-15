@@ -104,3 +104,4 @@ note: "SUPER ADMIN" tidak punya akses.
     output setiap endpoint nya
     errorHandler nya
     model nya
+    authMiddleware

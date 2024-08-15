@@ -17,6 +17,15 @@ export const login = async (
 ) => {
   try {
     const { email, password } = req.body;
+
+    if (!email) {
+      throw { name: "Required", param: "Email" };
+    }
+
+    if (!password) {
+      throw { name: "Required", param: "Password" };
+    }
+
     const instance = await User.findOne({ where: { email } });
     if (!instance) {
       throw { name: "login failed" };
@@ -79,6 +88,7 @@ export const editUser = async (
         },
       ],
     });
+
     if (!user) throw { name: "Not Found", param: "User" };
 
     if (userRole == "OWNER") {
@@ -106,9 +116,10 @@ export const editUser = async (
     const userResponse = user.get({ plain: true });
     delete userResponse.password;
 
-    res
-      .status(200)
-      .json({ message: "Success update user data", data: userResponse });
+    res.status(200).json({
+      message: "Success update user data",
+      data: userResponse,
+    });
   } catch (error) {
     next(error);
   }
