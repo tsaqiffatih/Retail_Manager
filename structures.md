@@ -25,7 +25,8 @@ RETAIL_MANAGER/
 ├── src/
 │   ├── config/
 │   │   ├── config.js
-│   │   └── connection.ts
+│   │   ├── connection.ts
+│   │   └── swagger.ts
 │   │
 │   ├── controllers/
 │   │   ├── attendanceController.ts
@@ -107,3 +108,4 @@ RETAIL_MANAGER/
 ├── README.md
 ├── structures.md
 └── tsconfig.json
+```

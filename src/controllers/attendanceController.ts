@@ -6,8 +6,11 @@ import User from "../models/user";
 import Employee from "../models/employee";
 import Store from "../models/store";
 
-// Fungsi untuk otorisasi
-export const authorizeUser = async (req: AuthenticatedRequest, EmployeeId: number) => {
+// function for authorization
+export const authorizeUser = async (
+  req: AuthenticatedRequest,
+  EmployeeId: number
+) => {
   const userRole = req.userData?.role;
   const userId = req.userData?.id;
   const storeId = req.userData?.storeId;
@@ -26,10 +29,10 @@ export const authorizeUser = async (req: AuthenticatedRequest, EmployeeId: numbe
     ],
   });
 
-  console.log(user?.employee?.store?.id,"employee<<<<<<<");
-  console.log(userId,"userLogin<<<<<<<");
-  console.log(storeId,"userLoginStoreId<<<<<<<");
-  
+  console.log(user?.employee?.store?.id, "employee<<<<<<<");
+  console.log(userId, "userLogin<<<<<<<");
+  console.log(storeId, "userLoginStoreId<<<<<<<");
+
   if (userRole === "OWNER") {
     if (userId !== user?.employee?.store?.OwnerId) {
       throw { name: "access_denied" };
@@ -47,48 +50,6 @@ export const authorizeUser = async (req: AuthenticatedRequest, EmployeeId: numbe
   }
 };
 
-export const createAttendance = async (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { date, status, EmployeeId } = req.body;
-
-    if (!EmployeeId) {
-      throw {name: 'Required'}
-    }
-
-    await authorizeUser(req, EmployeeId);
-
-    const attendance = await Attendance.create({ date, status, EmployeeId });
-    res.status(201).json({ message: "Attendance recorded successfully", data: attendance });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const deleteAttendance = async (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { id } = req.params;
-
-    const attendance = await Attendance.findByPk(id);
-    if (!attendance) {
-      return res.status(404).json({ message: "Attendance not found" });
-    }
-
-    await authorizeUser(req, attendance.EmployeeId);
-    await attendance.destroy();
-    res.status(200).json({ message: "Attendance deleted successfully" });
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const editAttendance = async (
   req: AuthenticatedRequest,
   res: Response,
@@ -96,7 +57,13 @@ export const editAttendance = async (
 ) => {
   try {
     const { id } = req.params;
-    const updatedData = req.body;
+    const { status } = req.body;
+
+    // Validasi bahwa status merupakan salah satu dari nilai yang valid
+    const validStatuses: StatusType[] = ["Present", "Absent", "Sick", "Leave"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
 
     const attendance = await Attendance.findByPk(id);
     if (!attendance) {
@@ -104,9 +71,15 @@ export const editAttendance = async (
     }
 
     await authorizeUser(req, attendance.EmployeeId);
-    await attendance.update(updatedData);
 
-    res.status(200).json({ message: "Attendance updated successfully", data: attendance });
+    // Update status dengan validasi
+    attendance.status = status;
+    await attendance.save();
+
+    res.status(200).json({
+      message: "Attendance updated successfully",
+      data: attendance,
+    });
   } catch (error) {
     next(error);
   }
@@ -128,7 +101,10 @@ export const generateAttendanceReport = async (
     // Validasi status
     const validStatuses: StatusType[] = ["Present", "Absent", "Sick", "Leave"];
     if (status && !validStatuses.includes(status as StatusType)) {
-      return res.status(400).json({ message: "Invalid status value. Allowed values are Present, Absent, Sick, or Leave." });
+      return res.status(400).json({
+        message:
+          "Invalid status value. Allowed values are Present, Absent, Sick, or Leave.",
+      });
     }
 
     let whereCondition: any = {};
@@ -141,7 +117,10 @@ export const generateAttendanceReport = async (
     // Filter by date range if provided
     if (startDate && endDate) {
       whereCondition.date = {
-        [Op.between]: [new Date(startDate as string), new Date(endDate as string)],
+        [Op.between]: [
+          new Date(startDate as string),
+          new Date(endDate as string),
+        ],
       };
     }
 
@@ -195,4 +174,3 @@ export const generateAttendanceReport = async (
     next(error);
   }
 };
-
