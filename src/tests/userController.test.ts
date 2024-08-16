@@ -89,7 +89,7 @@ describe("User Controller Tests", () => {
     });
   });
 
-  describe("POST /register/owner", () => {
+  describe("POST /register-owner", () => {
     test("success post", async () => {
       const response = await request(app)
         .post("/api/users/register")
@@ -263,11 +263,11 @@ describe("User Controller Tests", () => {
       );
     });
   });
-  /*
+  
   describe("POST /register-employee", () => {
     test("success post /register-employee", async () => {
       const response = await request(app)
-        .post("/api/users/register/employee")
+        .post("/api/users/register")
         .send({
           firstName: "employee",
           lastName: "Test",
@@ -291,7 +291,7 @@ describe("User Controller Tests", () => {
     test("fail post cause existing email", async () => {
       
       const response = await request(app)
-        .post("/api/users/register/employee")
+        .post("/api/users/register")
         .send({
           firstName: "employee",
           lastName: "Test2",
@@ -302,7 +302,7 @@ describe("User Controller Tests", () => {
           position: "Staff",
           salary: 3000,
           password: "employeePass1",
-          email: "employeeTest@mail.com", // email yang sama dengan sebelumnya
+          email: "employeeTest@mail.com",
         })
         .set("Authorization", `Bearer ${adminToken}`);
 
@@ -315,7 +315,7 @@ describe("User Controller Tests", () => {
     test("fail post cause existing username", async () => {
       
       const response = await request(app)
-        .post("/api/users/register/employee")
+        .post("/api/users/register")
         .send({
           firstName: "employee",
           lastName: "Test",
@@ -341,35 +341,34 @@ describe("User Controller Tests", () => {
     test("success patch /edit-user", async () => {
       
       const response = await request(app)
-        .patch("/api/users/edit/user/1") // Sesuaikan dengan id yang ada di database
+        .patch("/api/users/6")
         .send({
           userName: "updatedName",
           email: "updated@mail.com",
-          password: "updatedPass",
+          password: "updatedPass1",
         })
         .set("Authorization", `Bearer ${employeeToken}`);
 
       const { body, status } = response;
       expect(status).toBe(200);
       expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty("message", "Success update data");
+      expect(body).toHaveProperty("message", "Success update user data");
     });
 
     test("fail patch /edit-user with unauthorized access", async () => {
-      
       const response = await request(app)
-        .patch("/api/users/edit-user/1") // Sesuaikan dengan id yang ada di database
+        .patch("/api/users/1") 
         .send({
           userName: "updatedName",
           email: "updated@mail.com",
           password: "updatedPass",
         })
-        .set("Authorization", `Bearer 2029392948384932309102392220429`); // Sesuaikan dengan token yang tidak valid
+        .set("Authorization",`Bearer ${ownerToken}`);
 
       const { body, status } = response;
       expect(status).toBe(401);
       expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty("message", "access_denied");
+      expect(body).toHaveProperty("message", "access denied");
     });
   });
 /*
