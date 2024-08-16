@@ -12,20 +12,20 @@ import Attendance from "./models/attendance";
 import Payroll from "./models/payroll";
 import AuditLog from "./models/auditlog";
 
-const createTestDatabase = async () => {
-  const sequelize = new Sequelize(
-    "postgres",
-    process.env.DB_USERNAME as string,
-    process.env.DB_PASSWORD,
-    {
-      host: "127.0.0.1",
-      dialect: "postgres",
-      logging: false,
-    }
-  );
+export const sequelizeTest = new Sequelize(
+  "postgres",
+  process.env.DB_USERNAME as string,
+  process.env.DB_PASSWORD,
+  {
+    host: "127.0.0.1",
+    dialect: "postgres",
+    logging: false,
+  }
+);
 
+const createTestDatabase = async () => {
   try {
-    await sequelize.query("CREATE DATABASE database_test");
+    await sequelizeTest.query("CREATE DATABASE database_test");
   } catch (error) {
     if (error instanceof Error) {
       if (
@@ -43,7 +43,7 @@ const createTestDatabase = async () => {
       throw error; // Re-throw if the error is not an instance of Error
     }
   } finally {
-    await sequelize.close();
+    await sequelizeTest.close();
     console.log("========== create database done ==========")
   }
 };

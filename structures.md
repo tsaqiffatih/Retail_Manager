@@ -3,14 +3,6 @@
 ```plaintext
 RETAIL_MANAGER/
 │
-├── docs/
-│   └── swagger
-│        ├── attendance.yaml
-│        ├── employee.yaml
-│        ├── index.yaml
-│        ├── payroll.yaml
-│        ├── store.yaml
-│        └── user.yaml
 │
 ├── dummy/
 │   ├── attendance.json
@@ -25,8 +17,7 @@ RETAIL_MANAGER/
 ├── src/
 │   ├── config/
 │   │   ├── config.js
-│   │   ├── connection.ts
-│   │   └── swagger.ts
+│   │   └── connection.ts
 │   │
 │   ├── controllers/
 │   │   ├── attendanceController.ts
@@ -43,10 +34,11 @@ RETAIL_MANAGER/
 │   │   ├── isStrongPassword.ts
 │   │   ├── isValidCategory.ts
 │   │   ├── jsonWebToken.ts
-│   │   ├── locationValidation.ts
+│   │   └── locationValidation.ts
 │   │
 │   ├── interface/
-│   │   └── auth.ts
+│   │   ├── auth.ts
+│   │   └── index.ts
 │   │
 │   ├── middleware/
 │   │   ├── auditMiddleware.ts
@@ -89,11 +81,8 @@ RETAIL_MANAGER/
 │   │   ├── 20240727200015-payroll-seed-initial.js
 │   │   └── 20240727200037-auditLog-seed-initial.js
 │   │
-│   ├── services/
-│   │   └── userService.ts
-│   │
 │   ├── tests/
-│   │   └── app.ts
+│   │   └── userController.test.ts
 │   │
 │   ├── app.ts
 │   └── jest.setup.ts
