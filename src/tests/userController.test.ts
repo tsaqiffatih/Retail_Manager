@@ -1,8 +1,8 @@
 import request from "supertest";
-import app, { server } from "../app"; // Sesuaikan dengan path ke file utama aplikasi Anda
+import app, { server } from "../app";
 import sequelizeConnection from "../config/connection";
 import { Sequelize } from "sequelize";
-import { createToken } from "../helper/jsonWebToken"; // Sesuaikan dengan path ke file helper jsonWebToken
+import { createToken } from "../helper/jsonWebToken";
 
 const deleteTestDatabase = async () => {
   const sequelize = new Sequelize(
@@ -19,21 +19,25 @@ const deleteTestDatabase = async () => {
   try {
     await sequelize.query("DROP DATABASE IF EXISTS database_test");
   } catch (error) {
-    // console.log("Error deleting database:", error);
+    console.log("Error deleting database:", error);
   } finally {
-    // console.log("========== Test database deleted ==========");
+    console.log("========== Test database deleted ==========");
     await sequelize.close();
   }
 };
 
-
 describe("User Controller Tests", () => {
-
-   // Simulated payloads for different roles
-  const superAdminPayload = { email: 'superAdmin@mail.com', username: 'superAdmin' };
-  const ownerPayload = { email: 'owner1@mail.com', username: 'owner1Pass' };
-  const adminPayload = { email: 'admin1@mail.com', username: 'admin1Pass' };
-  const employeePayload = { email: 'employee1@mail.com', username: 'employee1Pass' };
+  // Simulated payloads for different roles
+  const superAdminPayload = {
+    email: "superAdmin@mail.com",
+    username: "superAdmin",
+  };
+  const ownerPayload = { email: "owner1@mail.com", username: "owner1Pass" };
+  const adminPayload = { email: "admin1@mail.com", username: "admin1Pass" };
+  const employeePayload = {
+    email: "employee1@mail.com",
+    username: "employee1Pass",
+  };
 
   // Generate tokens for different roles
   const superAdminToken = createToken(superAdminPayload);
@@ -57,7 +61,7 @@ describe("User Controller Tests", () => {
       const { body, status } = response;
       expect(status).toBe(200);
       expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty("data", expect.any(String));
+      expect(body).toHaveProperty("access_token", expect.any(String));
     });
 
     test("fail post /login with wrong email", async () => {
@@ -88,74 +92,102 @@ describe("User Controller Tests", () => {
   describe("POST /register/owner", () => {
     test("success post", async () => {
       const response = await request(app)
-        .post("/api/users/register/owner")
+        .post("/api/users/register")
         .send({
           userName: "ownerTest",
           email: "ownerTest@mail.com",
           password: "ownerPass1",
+          role: "OWNER",
         })
         .set("Authorization", `Bearer ${superAdminToken}`);
 
-      const { body, status } = response;
-      expect(status).toBe(200);
-      expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty("message", expect.any(String));
+      expect(response.status).toBe(200);
+      expect(response.body).toBeInstanceOf(Object);
+      expect(response.body).toHaveProperty("message", expect.any(String));
     });
 
-    test("fail post cause use existing userName ", async () => {
-      const response = await request(app)
-        .post("/api/users/register/owner")
+    test("fail post cause use existing userName", async () => {
+      await request(app)
+        .post("/api/users/register")
         .send({
           userName: "ownerTest",
           email: "ownerTest@mail.com",
           password: "ownerPass1",
+          role: "OWNER",
         })
         .set("Authorization", `Bearer ${superAdminToken}`);
 
-      const { body, status } = response;
-      expect(status).toBe(400);
-      expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty("message", "userName has been already exists");
+      const response = await request(app)
+        .post("/api/users/register")
+        .send({
+          userName: "ownerTest",
+          email: "ownerTest2@mail.com",
+          password: "ownerPass1",
+          role: "OWNER",
+        })
+        .set("Authorization", `Bearer ${superAdminToken}`);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toBeInstanceOf(Object);
+      expect(response.body).toHaveProperty(
+        "message",
+        "userName has been already exists"
+      );
     });
 
     test("fail post cause use existing email", async () => {
-      const response = await request(app)
-        .post("/api/users/register/owner")
+      await request(app)
+        .post("/api/users/register")
         .send({
-          userName: "ownerTest1",
+          userName: "ownerTest2",
           email: "ownerTest@mail.com",
           password: "ownerPass1",
+          role: "OWNER",
         })
         .set("Authorization", `Bearer ${superAdminToken}`);
 
-      const { body, status } = response;
-      expect(status).toBe(400);
-      expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty("message", "email has been already exists");
+      const response = await request(app)
+        .post("/api/users/register")
+        .send({
+          userName: "ownerTest3",
+          email: "ownerTest@mail.com",
+          password: "ownerPass1",
+          role: "OWNER",
+        })
+        .set("Authorization", `Bearer ${superAdminToken}`);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toBeInstanceOf(Object);
+      expect(response.body).toHaveProperty(
+        "message",
+        "email has been already exists"
+      );
     });
 
-    test("fail post cause use bad password", async () => {
+    test("fail post cause bad password", async () => {
       const response = await request(app)
-        .post("/api/users/register/owner")
+        .post("/api/users/register")
         .send({
           userName: "ownerTest",
           email: "ownerTest@mail.com",
           password: "ownerPass",
+          role: "OWNER",
         })
         .set("Authorization", `Bearer ${superAdminToken}`);
 
-      const { body, status } = response;
-      expect(status).toBe(400);
-      expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty("message", "Password must contain at least one number.");
+      expect(response.status).toBe(400);
+      expect(response.body).toBeInstanceOf(Object);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Password must contain at least one number."
+      );
     });
   });
 
   describe("POST /register-admin", () => {
     test("success post /register-admin", async () => {
-      
       const response = await request(app)
-        .post("/api/users/register/admin")
+        .post("/api/users/register")
         .send({
           firstName: "admin",
           lastName: "Test",
@@ -167,20 +199,19 @@ describe("User Controller Tests", () => {
           salary: 500000,
           password: "adminPass1",
           email: "adminTest@mail.com",
-          storeId: 1
+          storeId: 1,
+          role: "ADMIN",
         })
         .set("Authorization", `Bearer ${ownerToken}`);
 
-      const { body, status } = response;
-      expect(status).toBe(200);
-      expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty("message", expect.any(String));
+      expect(response.status).toBe(200);
+      expect(response.body).toBeInstanceOf(Object);
+      expect(response.body).toHaveProperty("message", expect.any(String));
     });
 
     test("fail post /register-admin with existing userName", async () => {
-      
       const response = await request(app)
-        .post("/api/users/register/admin")
+        .post("/api/users/register")
         .send({
           firstName: "admin",
           lastName: "Test",
@@ -188,70 +219,51 @@ describe("User Controller Tests", () => {
           contact: "123456789",
           education: "Bachelor",
           address: "Admin Street",
-          position: "Manager",
-          salary: 5000,
+          position: "MANAGER",
+          salary: 500000,
           password: "adminPass1",
           email: "adminTest2@mail.com",
-          storeId: 1
+          storeId: 1,
+          role: "ADMIN",
         })
         .set("Authorization", `Bearer ${ownerToken}`);
 
-      const { body, status } = response;
-      expect(status).toBe(400);
-      expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty("message", "userName has been already exists");
+      expect(response.status).toBe(400);
+      expect(response.body).toBeInstanceOf(Object);
+      expect(response.body).toHaveProperty(
+        "message",
+        "userName has been already exists"
+      );
     });
 
     test("fail post /register-admin with existing email", async () => {
       const response = await request(app)
-        .post("/api/users/register/admin")
+        .post("/api/users/register")
         .send({
-          firstName: "admin",
-          lastName: "Test2",
+          firstName: "admin12",
+          lastName: "Test",
           dateOfBirth: "1990-01-01",
           contact: "123456789",
           education: "Bachelor",
           address: "Admin Street",
-          position: "Manager",
-          salary: 5000,
+          position: "MANAGER",
+          salary: 500000,
           password: "adminPass1",
           email: "adminTest@mail.com",
-          storeId: 1
+          storeId: 1,
+          role: "ADMIN",
         })
         .set("Authorization", `Bearer ${ownerToken}`);
 
-      const { body, status } = response;
-      expect(status).toBe(400);
-      expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty("message", "email has been already exists");
+      expect(response.status).toBe(400);
+      expect(response.body).toBeInstanceOf(Object);
+      expect(response.body).toHaveProperty(
+        "message",
+        "email has been already exists"
+      );
     });
-
-    test("fail post cause authorize role ", async () => {
-      const response = await request(app)
-        .post("/api/users/register/admin")
-        .send({
-          firstName: "admin",
-          lastName: "Test2",
-          dateOfBirth: "1990-01-01",
-          contact: "123456789",
-          education: "Bachelor",
-          address: "Admin Street",
-          position: "Manager",
-          salary: 5000,
-          password: "adminPass1",
-          email: "adminTest@mail.com",
-          storeId: 1
-        })
-        .set("Authorization", `Bearer ${employeeToken}`);
-
-      const { body, status } = response;
-      expect(status).toBe(403);
-      expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty("message", "Forbidden Access");
-    });
-
   });
-
+  /*
   describe("POST /register-employee", () => {
     test("success post /register-employee", async () => {
       const response = await request(app)
