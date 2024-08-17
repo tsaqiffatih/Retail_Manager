@@ -75,7 +75,6 @@ export const editUser = async (
   try {
     const { id: userId } = req.params;
     const { userName, email, password } = req.body;
-    // const { role: userRole, id: requestUserId, storeId } = req.userData
     const userRole = req.userData?.role
     const requestUserId = req.userData?.id
     const requestStoreId = req.userData?.storeId
@@ -99,7 +98,13 @@ export const editUser = async (
     }
 
     // Optional fields update
-    Object.assign(user, { userName, email, password });
+    if (email) user.email = email
+    if (password) user.password = password
+    if (userName) user.userName = userName
+
+    if (!email && !password && !userName) {
+      res.status(400).json({message: "No fields to update found"})
+    }
 
     await user.save();
 
