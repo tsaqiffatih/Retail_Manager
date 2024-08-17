@@ -73,48 +73,42 @@ export const editUser = async (
   next: NextFunction
 ) => {
   try {
-    const userId = req.params.id;
-    const userRole = req.userData?.role;
+    const { id: userId } = req.params;
+    const { userName, email, password } = req.body;
+    const userRole = req.userData?.role
+    const requestUserId = req.userData?.id
+    const requestStoreId = req.userData?.storeId
 
     const user = await User.findByPk(userId, {
-      include: [
-        {
-          model: Employee,
-          include: [
-            {
-              model: Store,
-            },
-          ],
-        },
-      ],
+      include: [{ model: Employee, include: [{ model: Store }] }],
     });
 
     if (!user) throw { name: "Not Found", param: "User" };
 
-    if (userRole == "OWNER") {
-      if (
-        req.userData?.id === user?.employee?.store?.OwnerId ||
-        req.userData?.id === user.id
-      ) {
-      } else {
-        throw { name: "forbidden" };
-      }
-    } else if (userRole == "ADMIN" || userRole == "MANAGER") {
-      if (req.userData?.storeId !== user?.employee?.store?.id) {
-        throw { name: "forbidden" };
-      }
-    } else if (userRole == "EMPLOYEE") {
-      if (req.userData?.id !== user?.id) {
-        throw { name: "forbidden" };
-      }
-    } else {
+    const storeOwnerId = user?.employee?.store?.OwnerId;
+    const userStoreId = user?.employee?.store?.id;
+
+    // Access Control
+    if (
+      (userRole === "OWNER" && requestUserId !== storeOwnerId && requestUserId !== user.id) ||
+      ((userRole === "ADMIN" || userRole === "MANAGER") && requestStoreId !== userStoreId) ||
+      (userRole === "EMPLOYEE" && requestUserId !== user.id)
+    ) {
       throw { name: "forbidden" };
     }
 
-    await user.update(req.body);
+    // Optional fields update
+    if (email) user.email = email
+    if (password) user.password = password
+    if (userName) user.userName = userName
 
-    const userResponse = user.get({ plain: true });
-    delete userResponse.password;
+    if (!email && !password && !userName) {
+      res.status(400).json({message: "No fields to update found"})
+    }
+
+    await user.save();
+
+    const { password: _, ...userResponse } = user.get({ plain: true });
 
     res.status(200).json({
       message: "Success update user data",
@@ -124,6 +118,7 @@ export const editUser = async (
     next(error);
   }
 };
+
 
 // ====> HARD DELETE <=====
 export const deleteUser = async (
