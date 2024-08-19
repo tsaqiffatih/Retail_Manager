@@ -1,31 +1,32 @@
 import request from "supertest";
-import app, { server } from "../app";
+import app from "../app";
 import sequelizeConnection from "../config/connection";
 import { Sequelize } from "sequelize";
 import { createToken } from "../helper/jsonWebToken";
+import { sequelizeTest } from "../jest.setup";
 
 // Helper function to delete the test database
-const deleteTestDatabase = async () => {
-  const sequelize = new Sequelize(
-    "postgres",
-    process.env.DB_USERNAME as string,
-    process.env.DB_PASSWORD,
-    {
-      host: "127.0.0.1",
-      dialect: "postgres",
-      logging: false,
-    }
-  );
+// const deleteTestDatabase = async () => {
+//   const sequelize = new Sequelize(
+//     "postgres",
+//     process.env.DB_USERNAME as string,
+//     process.env.DB_PASSWORD,
+//     {
+//       host: "127.0.0.1",
+//       dialect: "postgres",
+//       logging: false,
+//     }
+//   );
 
-  try {
-    await sequelize.query("DROP DATABASE IF EXISTS database_test");
-  } catch (error) {
-    console.error("Error deleting database:", error);
-  } finally {
-    console.log("========== Test database deleted ==========");
-    await sequelize.close();
-  }
-};
+//   try {
+//     await sequelizeTest.query("DROP DATABASE IF EXISTS database_test");
+//   } catch (error) {
+//     console.error("Error deleting database:", error);
+//   } finally {
+//     console.log("========== Test database deleted ==========");
+//     await sequelize.close();
+//   }
+// };
 
 
 
@@ -68,24 +69,24 @@ describe("User Controller Tests", () => {
   const { superAdminToken, ownerToken, adminToken, employeeToken } =
     generateTokens();
 
-    const closeServer = () => {
-      return new Promise<void>((resolve, reject) => {
-        server.close((err) => {
-          if (err) {
-            return reject(err);
-          }
-          resolve();
-        });
-      });
-    };
+    // const closeServer = () => {
+    //   return new Promise<void>((resolve, reject) => {
+    //     server.close((err) => {
+    //       if (err) {
+    //         return reject(err);
+    //       }
+    //       resolve();
+    //       console.log("server closed");
+    //     });
+    //   });
+    // };
 
   // Cleanup after all tests
-  afterAll(async () => {
-    await sequelizeConnection.close();
-    // server.close();
-    await closeServer()
-    await deleteTestDatabase();
-  }, 15000);
+  // afterAll(async () => {
+  //   await sequelizeConnection.close();
+
+  //   await deleteTestDatabase();
+  // });
 
   // Test block for /login route
   describe("POST /login", () => {

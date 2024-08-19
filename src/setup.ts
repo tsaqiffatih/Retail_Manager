@@ -1,4 +1,4 @@
-import { Sequelize } from "sequelize";
+import { Sequelize } from 'sequelize';
 import sequelizeConnection from "./config/connection";
 import path from "path";
 import fs from "fs";
@@ -11,6 +11,10 @@ import Employee from "./models/employee";
 import Attendance from "./models/attendance";
 import Payroll from "./models/payroll";
 import AuditLog from "./models/auditlog";
+import app from './app';
+
+const port = 3000;
+let server: any;
 
 export const sequelizeTest = new Sequelize(
   "postgres",
@@ -49,11 +53,6 @@ const createTestDatabase = async () => {
 };
 
 const seedingDatabase = async () => {
-  console.log("======= Setting up test database... =======");
-  await createTestDatabase();
-
-  console.log("========== Syncing database schema... ==========");
-  await sequelizeConnection.sync({ force: true });
 
   // ==> seeding user data to database test <==\\
   console.log("========== Seeding user data... ==========");
@@ -176,4 +175,47 @@ const seedingDatabase = async () => {
   // ==> seeding auditLog data to database test <==\\
 };
 
-export default seedingDatabase
+const deleteTestDatabase = async () => {
+  try {
+    await sequelizeTest.query("DROP DATABASE IF EXISTS database_test");
+  } catch (error) {
+    console.error("Error deleting database:", error);
+  } finally {
+    console.log("========== Test database deleted ==========");
+    // await sequelizeTest.close();
+  }
+};
+
+
+
+// Setup global environment sebelum semua tes
+beforeAll(async () => {
+  // Mengatur koneksi ke database
+  console.log("======= Setting up test database... =======");
+  await createTestDatabase();
+
+  console.log("========== Syncing database schema... ==========");
+  await sequelizeConnection.sync({ force: true });
+
+  await seedingDatabase()
+
+  // Menjalankan server Express
+  server = app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+  });
+});
+
+// Cleanup global environment setelah semua tes
+afterAll(async () => {
+  // Menutup server
+  if (server) {
+    server.close();
+  }
+
+  // Menutup koneksi ke database
+  await sequelizeConnection.close();
+
+  await deleteTestDatabase()
+
+  await sequelizeTest.close()
+});
