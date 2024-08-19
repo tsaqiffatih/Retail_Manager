@@ -58,5 +58,11 @@
     "email": "managerBoss21@mail.com",
     "password": "manager1Pass",
     "role": "MANAGER"
+  },
+  {
+    "userName": "owner3Boss",
+    "email": "owner3mail.com",
+    "password": "owner1Pass",
+    "role": "OWNER"
   }
 ]

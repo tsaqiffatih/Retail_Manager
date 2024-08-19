@@ -12,6 +12,7 @@ import Attendance from "./models/attendance";
 import Payroll from "./models/payroll";
 import AuditLog from "./models/auditlog";
 import app from './app';
+import { createToken } from './helper/jsonWebToken';
 
 const port = 3000;
 let server: any;
@@ -46,10 +47,7 @@ const createTestDatabase = async () => {
       console.log(`====== Re-throw if the error is not an instance of Error ${error}======`);
       throw error; // Re-throw if the error is not an instance of Error
     }
-  } finally {
-    // await sequelizeTest.close();
-    console.log("========== create database done ==========")
-  }
+  } 
 };
 
 const seedingDatabase = async () => {
@@ -180,19 +178,16 @@ const deleteTestDatabase = async () => {
     await sequelizeTest.query("DROP DATABASE IF EXISTS database_test");
   } catch (error) {
     console.error("Error deleting database:", error);
-  } finally {
-    console.log("========== Test database deleted ==========");
-    // await sequelizeTest.close();
-  }
+  } 
 };
-
-
 
 // Setup global environment sebelum semua tes
 beforeAll(async () => {
-  // Mengatur koneksi ke database
   console.log("======= Setting up test database... =======");
+
+  console.log("========== Start create database ==========")
   await createTestDatabase();
+  console.log("========== create database done ==========")
 
   console.log("========== Syncing database schema... ==========");
   await sequelizeConnection.sync({ force: true });
@@ -215,7 +210,9 @@ afterAll(async () => {
   // Menutup koneksi ke database
   await sequelizeConnection.close();
 
+  console.log("========== Start delete database ==========");
   await deleteTestDatabase()
+  console.log("========== Test database deleted ==========");
 
   await sequelizeTest.close()
 });

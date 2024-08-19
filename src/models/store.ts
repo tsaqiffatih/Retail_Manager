@@ -19,8 +19,8 @@ class Store extends Model {
     type: DataType.STRING,
     allowNull: false,
     validate: {
-      notNull: { msg: "Store name cannot be null" },
       notEmpty: { msg: "Store name is required" },
+      notNull: { msg: "Store name cannot be null" },
     },
     unique: {
       name: "Unique_Name_Constraint",
@@ -33,8 +33,8 @@ class Store extends Model {
     type: DataType.STRING,
     allowNull: false,
     validate: {
-      notNull: { msg: "Store location cannot be null" },
       notEmpty: { msg: "Store location is required" },
+      notNull: { msg: "Store location cannot be null" },
       isValidLocationCheck(value: string) {
         if(!isValidIndonesianLocation(value)) {
           throw {name: "invalid_location"}
@@ -48,8 +48,8 @@ class Store extends Model {
     type: DataType.STRING,
     allowNull: false,
     validate: {
-      notNull: { msg: "Store category cannot be null" },
       notEmpty: { msg: "Store category is required" },
+      notNull: { msg: "Store category cannot be null" },
       isValidCategoryCheck(value: string) {
         if(!isValidCategory(value)) {
           throw {name: "invalid_category"}

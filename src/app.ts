@@ -4,16 +4,15 @@ import dotenv from "dotenv";
 import router from "./routers";
 import errorHandler from "./middleware/errorHandler";
 import sequelizeConnection from "./config/connection";
-import portfinder from 'portfinder'
+import portfinder from "portfinder";
 import {
   schedulePayrollCreation,
   schedulePayrollUpdate,
 } from "./schedulers/payrollScheduler";
 import { scheduleAttendanceCreation } from "./schedulers/attendanceScheduler";
 
-
 // Load environment variables based on the environment
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 } else {
   dotenv.config();
@@ -38,7 +37,7 @@ app.get("/", (req: Request, res: Response) => {
 //     .sync()
 //     .then(() => {
 //       console.log("Database synced successfully.");
-      
+
 //       schedulePayrollCreation();
 //       schedulePayrollUpdate();
 //       scheduleAttendanceCreation()
@@ -48,44 +47,19 @@ app.get("/", (req: Request, res: Response) => {
 //     });
 // });
 
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== "test") {
   app.listen(port, () => {
     console.log(`Example app for ${appName} listening on port ${port}`);
     sequelizeConnection
       .sync()
-      .then(() => console.log('Database connected'))
-      .catch((err) => console.log('Error connecting to database:', err));
+      .then(() => {
+        console.log("Database connected");
+        schedulePayrollCreation();
+        schedulePayrollUpdate();
+        scheduleAttendanceCreation();
+      })
+      .catch((err) => console.log("Error connecting to database:", err));
   });
 }
-
-// const startServer = async () => {
-//   if (process.env.NODE_ENV === 'test') {
-//     // Use a dynamic port for testing
-//     portfinder.getPortPromise().then((port) => {
-//       const server = app.listen(port, () => {
-//         console.log(`Example app for ${appName} listening on port ${port}`);
-//         sequelizeConnection
-//           .sync()
-//           .then(() => console.log('Database connected'))
-//           .catch((err) => console.log('Error connecting to database:', err));
-//       });
-//       // Export the server instance
-//       (global as any).testServer = server;
-//     });
-//   } else {
-//     const server = app.listen(port, () => {
-//       console.log(`Example app for ${appName} listening on port ${port}`);
-//       sequelizeConnection
-//         .sync()
-//         .then(() => console.log('Database connected'))
-//         .catch((err) => console.log('Error connecting to database:', err));
-//     });
-//     // Export the server instance
-//     (global as any).testServer = server;
-//   }
-// };
-
-// startServer();
-
 
 export default app;
