@@ -49,6 +49,7 @@ const createTestDatabase = async () => {
 };
 
 const seedingDatabase = async () => {
+  console.time("Seeding Database Time")
   console.log("======= Setting up test database... =======");
   await createTestDatabase();
 
@@ -174,6 +175,7 @@ const seedingDatabase = async () => {
   await AuditLog.bulkCreate(auditLogData);
   console.log("=========== AuditLog data seeded... ===========");
   // ==> seeding auditLog data to database test <==\\
+  console.timeEnd("Seeding Database Time");
 };
 
 export default seedingDatabase

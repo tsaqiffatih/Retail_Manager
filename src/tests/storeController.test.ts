@@ -31,6 +31,7 @@ const generateTokens = () => ({
 
 // Test suite untuk user endpoints
 describe("Store Controller Tests", () => {
+  console.time("Testing STORE time:");
   const {
     ownerToken,
     adminToken,
@@ -260,7 +261,7 @@ describe("Store Controller Tests", () => {
         "Store category cannot be null"
       );
     });
-    /*
+
     test("fail POST /stores with invalid token", async () => {
       const storeData = {
         name: "New Electronics Store",
@@ -271,10 +272,10 @@ describe("Store Controller Tests", () => {
       const response = await request(app)
         .post("/api/stores")
         .set("Authorization", `Bearer 1831813831818329183`)
-        .send(storeData)
-        .expect(401); // Assuming invalid token returns 401 Unauthorized
+        .send(storeData);
 
-      expect(response.body.message).toBe("Unauthorized access.");
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty("message", "Invalid Token");
     });
 
     test("fail POST /stores with missing token", async () => {
@@ -284,29 +285,262 @@ describe("Store Controller Tests", () => {
         category: "Electronics",
       };
 
-      const response = await request(app)
-        .post("/api/stores")
-        .send(storeData)
-        .expect(401); // Assuming missing token returns 401 Unauthorized
+      const response = await request(app).post("/api/stores").send(storeData);
 
-      expect(response.body.message).toBe("Unauthorized access.");
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty("message", "Invalid Token");
     });
 
-    test("fail POST /stores with invalid data", async () => {
+    test("fail POST /stores with invalid location", async () => {
       const storeData = {
         name: "Invalid Store",
-        location: "12345", // Assuming location should be a valid city or address
-        category: "", // Assuming category cannot be empty
+        location: "12345",
+        category: "Electronics",
       };
 
       const response = await request(app)
         .post("/api/stores")
         .set("Authorization", `Bearer ${ownerToken}`)
-        .send(storeData)
-        .expect(400); // Adjust based on how your application handles invalid data
+        .send(storeData);
 
-      expect(response.body.message).toBe("Invalid data.");
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Store location must be in indonesia location"
+      );
+    });
+
+    test("fail POST /stores with invalid category", async () => {
+      const storeData = {
+        name: "Invalid Store",
+        location: "Surabaya",
+        category: "Animals",
+      };
+
+      const response = await request(app)
+        .post("/api/stores")
+        .set("Authorization", `Bearer ${ownerToken}`)
+        .send(storeData);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty("message", "Invalid Store Category");
+    });
+  });
+
+  describe("GET /stores/:id Endpoint Tests", () => {
+    test("should return 200 and store details for OWNER with valid store ID", async () => {
+      const response = await request(app)
+        .get(`/api/stores/1`)
+        .set("Authorization", `Bearer ${ownerToken}`);
+
+      // Directly access the store object
+      const store = response.body.data;
+      expect(store).toMatchObject({
+        id: expect.any(Number),
+        name: expect.any(String),
+        location: expect.any(String),
+        category: expect.any(String),
+        code: expect.any(String),
+        OwnerId: expect.any(Number),
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        employees: expect.arrayContaining([
+          expect.objectContaining({
+            id: expect.any(Number),
+            firstName: expect.any(String),
+            lastName: expect.any(String),
+            dateOfBirth: expect.any(String),
+            contact: expect.any(String),
+            education: expect.any(String),
+            address: expect.any(String),
+            position: expect.any(String),
+            salary: expect.any(Number),
+            UserId: expect.any(Number),
+            StoreId: expect.any(Number),
+            createdAt: expect.any(String),
+            updatedAt: expect.any(String),
+            payrolls: expect.arrayContaining([
+              expect.objectContaining({
+                id: expect.any(Number),
+                date: expect.any(String),
+                amount: expect.any(Number),
+                status: expect.any(String),
+                EmployeeId: expect.any(Number),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String),
+              }),
+            ]),
+            attendances: expect.arrayContaining([
+              expect.objectContaining({
+                id: expect.any(Number),
+                date: expect.any(String),
+                status: expect.any(String),
+                EmployeeId: expect.any(Number),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String),
+              }),
+            ]),
+          }),
+        ]),
+      });
+      expect(response.status).toBe(200);
+      expect(response.body.message).toBe("success");
+      expect(store.id).toBe(1);
+    });
+
+    test("should return 200 and store details for ADMIN with valid store ID", async () => {
+      const response = await request(app)
+        .get(`/api/stores/2`)
+        .set("Authorization", `Bearer ${adminToken}`);
+
+      const store = response.body.data;
+      expect(store).toMatchObject({
+        id: expect.any(Number),
+        name: expect.any(String),
+        location: expect.any(String),
+        category: expect.any(String),
+        code: expect.any(String),
+        OwnerId: expect.any(Number),
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        employees: expect.arrayContaining([
+          expect.objectContaining({
+            id: expect.any(Number),
+            firstName: expect.any(String),
+            lastName: expect.any(String),
+            dateOfBirth: expect.any(String),
+            contact: expect.any(String),
+            education: expect.any(String),
+            address: expect.any(String),
+            position: expect.any(String),
+            salary: expect.any(Number),
+            UserId: expect.any(Number),
+            StoreId: expect.any(Number),
+            createdAt: expect.any(String),
+            updatedAt: expect.any(String),
+            payrolls: expect.arrayContaining([
+              expect.objectContaining({
+                id: expect.any(Number),
+                date: expect.any(String),
+                amount: expect.any(Number),
+                status: expect.any(String),
+                EmployeeId: expect.any(Number),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String),
+              }),
+            ]),
+            attendances: expect.arrayContaining([
+              expect.objectContaining({
+                id: expect.any(Number),
+                date: expect.any(String),
+                status: expect.any(String),
+                EmployeeId: expect.any(Number),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String),
+              }),
+            ]),
+          }),
+        ]),
+      });
+      expect(response.status).toBe(200);
+      expect(response.body.message).toBe("success");
+      expect(response.body.data.id).toBe(2);
+    });
+
+    test('should return 200 and store details for MANAGER with valid store ID', async () => {
+      const response = await request(app)
+        .get(`/api/stores/1`)
+        .set('Authorization', `Bearer ${managerToken}`);
+      
+        const store = response.body.data;
+        expect(store).toMatchObject({
+          id: expect.any(Number),
+          name: expect.any(String),
+          location: expect.any(String),
+          category: expect.any(String),
+          code: expect.any(String),
+          OwnerId: expect.any(Number),
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          employees: expect.arrayContaining([
+            expect.objectContaining({
+              id: expect.any(Number),
+              firstName: expect.any(String),
+              lastName: expect.any(String),
+              dateOfBirth: expect.any(String),
+              contact: expect.any(String),
+              education: expect.any(String),
+              address: expect.any(String),
+              position: expect.any(String),
+              salary: expect.any(Number),
+              UserId: expect.any(Number),
+              StoreId: expect.any(Number),
+              createdAt: expect.any(String),
+              updatedAt: expect.any(String),
+              payrolls: expect.arrayContaining([
+                expect.objectContaining({
+                  id: expect.any(Number),
+                  date: expect.any(String),
+                  amount: expect.any(Number),
+                  status: expect.any(String),
+                  EmployeeId: expect.any(Number),
+                  createdAt: expect.any(String),
+                  updatedAt: expect.any(String),
+                }),
+              ]),
+              attendances: expect.arrayContaining([
+                expect.objectContaining({
+                  id: expect.any(Number),
+                  date: expect.any(String),
+                  status: expect.any(String),
+                  EmployeeId: expect.any(Number),
+                  createdAt: expect.any(String),
+                  updatedAt: expect.any(String),
+                }),
+              ]),
+            }),
+          ]),
+        });
+      expect(response.status).toBe(200);
+      expect(response.body.message).toBe('success');
+      expect(response.body.data.id).toBe(1);
+    });
+  /*
+    test('should return 403 for EMPLOYEE with valid store ID', async () => {
+      const response = await request(app)
+        .get(`/api/stores/${storeId}`)
+        .set('Authorization', `Bearer ${employeeToken}`);
+      
+      expect(response.status).toBe(403);
+      expect(response.body.message).toBe('Forbidden Access');
+    });
+  /*
+    test('should return 404 for invalid store ID', async () => {
+      const response = await request(app)
+        .get('/api/stores/999999')
+        .set('Authorization', `Bearer ${ownerToken}`);
+      
+      expect(response.status).toBe(404);
+      expect(response.body.message).toBe('Not Found');
+    });
+  /*
+    test('should return 403 for unauthorized access to store details', async () => {
+      const anotherUser = await User.findOne({ where: { email: 'anotherowner@example.com' } });
+      const anotherStore = await Store.create({
+        name: 'Another Store',
+        location: 'Jakarta',
+        category: 'Electronics',
+        OwnerId: anotherUser!.id,
+      });
+  
+      const response = await request(app)
+        .get(`/api/stores/${anotherStore.id}`)
+        .set('Authorization', `Bearer ${ownerToken}`);
+      
+      expect(response.status).toBe(403);
+      expect(response.body.message).toBe('Unauthorized_Get_Store');
     });
     */
   });
+  console.timeEnd("Testing STORE time:");
 });

@@ -37,7 +37,7 @@ class Store extends Model {
       notNull: { msg: "Store location cannot be null" },
       isValidLocationCheck(value: string) {
         if(!isValidIndonesianLocation(value)) {
-          throw {name: "invalid_location"}
+          throw new Error ("Store location must be in indonesia location")
         }
       }
     },
@@ -52,7 +52,7 @@ class Store extends Model {
       notNull: { msg: "Store category cannot be null" },
       isValidCategoryCheck(value: string) {
         if(!isValidCategory(value)) {
-          throw {name: "invalid_category"}
+          throw new Error ("Invalid Store Category")
         }
       }
     },

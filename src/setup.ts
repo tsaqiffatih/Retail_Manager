@@ -31,6 +31,8 @@ export const sequelizeTest = new Sequelize(
 const createTestDatabase = async () => {
   try {
     await sequelizeTest.query("CREATE DATABASE database_test");
+    console.log("database_test created");
+    
   } catch (error) {
     if (error instanceof Error) {
       if (
@@ -182,7 +184,9 @@ const deleteTestDatabase = async () => {
 };
 
 // Setup global environment sebelum semua tes
+// 
 beforeAll(async () => {
+  console.time("Start setup beforeAll")
   console.log("======= Setting up test database... =======");
 
   console.log("========== Start create database ==========")
@@ -198,7 +202,8 @@ beforeAll(async () => {
   server = app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
   });
-});
+  console.timeEnd("Start setup beforeAll");
+},10000);
 
 // Cleanup global environment setelah semua tes
 afterAll(async () => {

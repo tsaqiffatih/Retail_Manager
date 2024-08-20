@@ -22,14 +22,14 @@ export const authentication = async (
   try {
     const access = req.headers.authorization;
 
-    if (!access) throw { name: "Invalid Token" };
+    if (!access) throw { name: "invalid token" };
     const [bearer, token] = access.split(" ");
 
-    if (bearer !== "Bearer" || !token) throw { name: "Invalid Token" };
+    if (bearer !== "Bearer" || !token) throw { name: "invalid token" };
 
     const verify = verifyToken(token) as TokenPayload
 
-    if (typeof verify === "string" || !('email' in verify)) throw { name: "Invalid Token" };
+    if (typeof verify === "string" || !('email' in verify)) throw { name: "invalid token" };
 
     const user = await User.findOne({
       where: { email: verify.email },
