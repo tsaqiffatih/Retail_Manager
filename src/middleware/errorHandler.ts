@@ -58,7 +58,7 @@ const errorHandler = (err: CustomError, req: Request, res: Response, next: NextF
         status = 400;
         message = "Input a valid Store Id";
     } else if (name === 'Unauthorized_Get_Store') {
-        status = 400;
+        status = 403;
         message = "You do not have permission to access this store";
     } else if (name === 'Invalid Action Type') {
         status = 400;

@@ -1,4 +1,4 @@
-import request from "supertest"; // koneksi database
+import request from "supertest";
 import app from "../app";
 import { createToken } from "../helper/jsonWebToken";
 
@@ -27,6 +27,10 @@ const generateTokens = () => ({
     email: "employee1@mail.com",
     username: "employee1Pass",
   }),
+  ownerToken2: createToken({
+    email: "owner2@mail.com",
+    username: "owner21",
+  }),
 });
 
 // Test suite untuk user endpoints
@@ -38,6 +42,7 @@ describe("Store Controller Tests", () => {
     employeeToken,
     managerToken,
     noStoreOwnerToken,
+    ownerToken2
   } = generateTokens();
 
   describe("GET /stores", () => {
@@ -194,7 +199,7 @@ describe("Store Controller Tests", () => {
         .post("/api/stores")
         .set("Authorization", `Bearer ${ownerToken}`)
         .send(storeData);
-
+      
       expect(response.status).toBe(200);
       expect(response.body.message).toBe("success");
       expect(response.body.data).toMatchObject({
@@ -447,100 +452,169 @@ describe("Store Controller Tests", () => {
       expect(response.body.data.id).toBe(2);
     });
 
-    test('should return 200 and store details for MANAGER with valid store ID', async () => {
+    test("should return 200 and store details for MANAGER with valid store ID", async () => {
       const response = await request(app)
         .get(`/api/stores/1`)
-        .set('Authorization', `Bearer ${managerToken}`);
-      
-        const store = response.body.data;
-        expect(store).toMatchObject({
-          id: expect.any(Number),
-          name: expect.any(String),
-          location: expect.any(String),
-          category: expect.any(String),
-          code: expect.any(String),
-          OwnerId: expect.any(Number),
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-          employees: expect.arrayContaining([
-            expect.objectContaining({
-              id: expect.any(Number),
-              firstName: expect.any(String),
-              lastName: expect.any(String),
-              dateOfBirth: expect.any(String),
-              contact: expect.any(String),
-              education: expect.any(String),
-              address: expect.any(String),
-              position: expect.any(String),
-              salary: expect.any(Number),
-              UserId: expect.any(Number),
-              StoreId: expect.any(Number),
-              createdAt: expect.any(String),
-              updatedAt: expect.any(String),
-              payrolls: expect.arrayContaining([
-                expect.objectContaining({
-                  id: expect.any(Number),
-                  date: expect.any(String),
-                  amount: expect.any(Number),
-                  status: expect.any(String),
-                  EmployeeId: expect.any(Number),
-                  createdAt: expect.any(String),
-                  updatedAt: expect.any(String),
-                }),
-              ]),
-              attendances: expect.arrayContaining([
-                expect.objectContaining({
-                  id: expect.any(Number),
-                  date: expect.any(String),
-                  status: expect.any(String),
-                  EmployeeId: expect.any(Number),
-                  createdAt: expect.any(String),
-                  updatedAt: expect.any(String),
-                }),
-              ]),
-            }),
-          ]),
-        });
+        .set("Authorization", `Bearer ${managerToken}`);
+
+      const store = response.body.data;
+      expect(store).toMatchObject({
+        id: expect.any(Number),
+        name: expect.any(String),
+        location: expect.any(String),
+        category: expect.any(String),
+        code: expect.any(String),
+        OwnerId: expect.any(Number),
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        employees: expect.arrayContaining([
+          expect.objectContaining({
+            id: expect.any(Number),
+            firstName: expect.any(String),
+            lastName: expect.any(String),
+            dateOfBirth: expect.any(String),
+            contact: expect.any(String),
+            education: expect.any(String),
+            address: expect.any(String),
+            position: expect.any(String),
+            salary: expect.any(Number),
+            UserId: expect.any(Number),
+            StoreId: expect.any(Number),
+            createdAt: expect.any(String),
+            updatedAt: expect.any(String),
+            payrolls: expect.arrayContaining([
+              expect.objectContaining({
+                id: expect.any(Number),
+                date: expect.any(String),
+                amount: expect.any(Number),
+                status: expect.any(String),
+                EmployeeId: expect.any(Number),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String),
+              }),
+            ]),
+            attendances: expect.arrayContaining([
+              expect.objectContaining({
+                id: expect.any(Number),
+                date: expect.any(String),
+                status: expect.any(String),
+                EmployeeId: expect.any(Number),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String),
+              }),
+            ]),
+          }),
+        ]),
+      });
       expect(response.status).toBe(200);
-      expect(response.body.message).toBe('success');
+      expect(response.body.message).toBe("success");
       expect(response.body.data.id).toBe(1);
     });
-  /*
-    test('should return 403 for EMPLOYEE with valid store ID', async () => {
+
+    test("should return 403 for EMPLOYEE with valid store ID", async () => {
       const response = await request(app)
-        .get(`/api/stores/${storeId}`)
-        .set('Authorization', `Bearer ${employeeToken}`);
-      
+        .get(`/api/stores/1`)
+        .set("Authorization", `Bearer ${employeeToken}`);
+
       expect(response.status).toBe(403);
-      expect(response.body.message).toBe('Forbidden Access');
+      expect(response.body.message).toBe("Forbidden Access");
     });
-  /*
-    test('should return 404 for invalid store ID', async () => {
+
+    test("should return 404 for invalid store ID", async () => {
       const response = await request(app)
-        .get('/api/stores/999999')
-        .set('Authorization', `Bearer ${ownerToken}`);
-      
+        .get("/api/stores/999999")
+        .set("Authorization", `Bearer ${ownerToken}`);
+
       expect(response.status).toBe(404);
-      expect(response.body.message).toBe('Not Found');
+      expect(response.body.message).toBe("Store is not found");
     });
-  /*
-    test('should return 403 for unauthorized access to store details', async () => {
-      const anotherUser = await User.findOne({ where: { email: 'anotherowner@example.com' } });
-      const anotherStore = await Store.create({
-        name: 'Another Store',
-        location: 'Jakarta',
-        category: 'Electronics',
-        OwnerId: anotherUser!.id,
-      });
-  
+
+    test("should return 403 for unauthorized access to store details", async () => {
       const response = await request(app)
-        .get(`/api/stores/${anotherStore.id}`)
-        .set('Authorization', `Bearer ${ownerToken}`);
-      
+        .get(`/api/stores/1`)
+        .set("Authorization", `Bearer ${noStoreOwnerToken}`);
+
       expect(response.status).toBe(403);
-      expect(response.body.message).toBe('Unauthorized_Get_Store');
+      expect(response.body.message).toBe(
+        "You do not have permission to access this store"
+      );
     });
-    */
+  });
+
+  const storeIdToDelete = 5; // ID store yang akan dihapus
+
+  describe("DELETE /stores/:storeId", () => {
+    it("fail delete/:storeId with not authorized", async () => {
+      const response = await request(app)
+        .delete(`/api/stores/${storeIdToDelete}`)
+        .set("Authorization", `Bearer 12152615361762131731736317`)
+
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Invalid Token"
+      );
+    });
+
+    it("fail delete/:storeId with store does not exist", async () => {
+      const response = await request(app)
+        .delete("/api/stores/9999") 
+        .set("Authorization", `Bearer ${ownerToken}`)
+        .expect(404);
+
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Store is not found"
+      );
+    });
+
+    it("fail delete/:storeId with missing Authorization header ", async () => {
+      const response = await request(app).delete(`/api/stores/${storeIdToDelete}`);
+
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Invalid Token"
+      );
+    });
+
+    it("fail delete/:storeId with Authorization header is not Bearer", async () => {
+      const response = await request(app)
+        .delete(`/api/stores/${storeIdToDelete}`)
+        .set("Authorization", `Basic ${ownerToken}`);
+
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Invalid Token"
+      );
+    });
+
+    it("fail delete/:storeId with user is not the store owner", async () => {
+      const response = await request(app)
+        .delete(`/api/stores/${storeIdToDelete}`)
+        .set("Authorization", `Bearer ${ownerToken2}`);
+
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty(
+        "message",
+        "access denied"
+      );
+    });
+
+    it("success delete/:storeId with store and associated users if authorized", async () => {
+      const response = await request(app)
+        .delete(`/api/stores/${storeIdToDelete}`)
+        .set("Authorization", `Bearer ${ownerToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Store and related Users deleted successfully"
+      );
+    });
+
   });
   console.timeEnd("Testing STORE time:");
 });
