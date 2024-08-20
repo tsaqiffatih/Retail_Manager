@@ -15,6 +15,7 @@ export const editPayroll = async (
   try {
     const { id } = req.params;
     const updatedData = req.body;
+    const { amount, status } = req.body;
 
     const payroll = await Payroll.findByPk(id);
     if (!payroll) {
@@ -23,7 +24,14 @@ export const editPayroll = async (
 
     await authorizeUser(req, payroll.EmployeeId);
 
-    await payroll.update(updatedData);
+    if (amount) payroll.amount = amount;
+    if (status) payroll.status = status;
+
+    if (!amount && !status) {
+      res.status(400).json({ message: "No fields to update found" });
+    }
+
+    await payroll.save;
     res.status(200).json({
       message: "Payroll updated successfully",
       data: payroll,
@@ -53,11 +61,9 @@ export const generatePayrollReport = async (
     // Validasi status
     const validStatuses = ["PAID", "UNPAID"];
     if (status && !validStatuses.includes(status as string)) {
-      return res
-        .status(400)
-        .json({
-          message: "Invalid status value. Allowed values are PAID or UNPAID.",
-        });
+      return res.status(400).json({
+        message: "Invalid status value. Allowed values are PAID or UNPAID.",
+      });
     }
 
     let whereCondition: any = {};
@@ -98,7 +104,7 @@ export const generatePayrollReport = async (
       throw { name: "access_denied" };
     }
 
-    const {rows: payrollReport, count} = await Payroll.findAndCountAll({
+    const { rows: payrollReport, count } = await Payroll.findAndCountAll({
       where: whereCondition,
       order: [["date", "ASC"]],
       include: [
@@ -123,11 +129,10 @@ export const generatePayrollReport = async (
     res.status(200).json({
       message: "Payroll report generated successfully",
       data: payrollReport,
-      totalItems: count
+      totalItems: count,
     });
   } catch (error) {
     next(error);
   }
 };
 // */
-

@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.use(authentication);
 
-// Route untuk memperbarui sebagian data absensi
+// Route untuk memperbarui status data absensi
 router.patch("/:id", auditMiddleware("Attendance"), editAttendance);
 
 // Route untuk menghasilkan laporan absensi

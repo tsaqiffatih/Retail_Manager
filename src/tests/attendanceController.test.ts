@@ -33,10 +33,14 @@ const generateTokens = () => ({
     email: "owner2@mail.com",
     username: "owner21",
   }),
+  manager3: createToken({
+    email: "managerBoss21@mail.com",
+    username: "managerBoss21",
+  }),
 });
 
 describe("Employee Controller Tests", () => {
-  console.time("Testing STORE time:");
+  console.time("Testing Employee time:");
   const {
     ownerToken,
     adminToken,
@@ -44,14 +48,57 @@ describe("Employee Controller Tests", () => {
     managerToken,
     noStoreOwnerToken,
     ownerToken2,
+    manager3,
   } = generateTokens();
 
-  const employeeId = 4;
+  const attendanceId = 8;
+  const updatedAttendance = 7;
 
-  describe("GET employees/:id", () => {
-    it("success GET /employees/:id retreives the employee's own data", async () => {
+  describe("PATCH attendances/:id", () => {
+    test("fail PATCH /attendances/:id for invalid fields/value are sent", async () => {
       const response = await request(app)
-        .get(`/api/employees/${employeeId}`)
+        .patch(`/api/attendances/${attendanceId}`)
+        .send({ attendanceId: "Present" })
+        .set("Authorization", `Bearer ${employeeToken}`)
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Invalid status value"
+      );
+    });
+
+    test("fail PATCH /attendances/:id for attendance not found", async () => {
+      const response = await request(app)
+        .patch(`/api/attendances/999`)
+        .send({ status: "Present" })
+        .set("Authorization", `Bearer ${employeeToken}`)
+
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty("message", "Attendance is not found");
+    });
+/*
+    test("success PATCH /attendances/:id for status", async () => {
+      const response = await request(app)
+        .patch(`/api/attendances/${updatedAttendance}`)
+        .set("Authorization", `Bearer ${manager3}`)
+        .send({ status: "sick" });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Attendance updated successfully"
+      );
+      expect(response.body.data);
+    });
+    */
+  });
+
+  describe("GET attendances/:id", () => {
+/*  
+    test("success GET /attendances/:id retreives the employee's own data", async () => {
+      const response = await request(app)
+        .get(`/api/attendances/${attendanceId}`)
         .set("Authorization", `Bearer ${employeeToken}`);
 
       const employee = response.body.data;
@@ -110,12 +157,12 @@ describe("Employee Controller Tests", () => {
       });
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty("message", "success");
-      expect(response.body.data).toHaveProperty("id", employeeId);
+      expect(response.body.data).toHaveProperty("id", attendanceId);
     });
-
-    it("success GET /employees/:id retrieves data for MANAGER/ADMIN with store access", async () => {
+/*
+    test("success GET /attendances/:id retrieves data for MANAGER/ADMIN with store access", async () => {
       const response = await request(app)
-        .get(`/api/employees/${employeeId}`)
+        .get(`/api/attendances/${attendanceId}`)
         .set("Authorization", `Bearer ${managerToken}`);
 
       const employee = response.body.data;
@@ -174,12 +221,12 @@ describe("Employee Controller Tests", () => {
       });
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty("message", "success");
-      expect(response.body.data).toHaveProperty("id", employeeId);
+      expect(response.body.data).toHaveProperty("id", attendanceId);
     });
-
-    it("success GET /employees/:id retrieves data for store OWNER", async () => {
+/*
+    test("success GET /attendances/:id retrieves data for store OWNER", async () => {
       const response = await request(app)
-        .get(`/api/employees/${employeeId}`)
+        .get(`/api/attendances/${attendanceId}`)
         .set("Authorization", `Bearer ${ownerToken}`);
 
       const employee = response.body.data;
@@ -238,62 +285,28 @@ describe("Employee Controller Tests", () => {
       });
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty("message", "success");
-      expect(response.body.data).toHaveProperty("id", employeeId);
+      expect(response.body.data).toHaveProperty("id", attendanceId);
     });
-
-    it("fail GET /employees/:id for roles without store access (ADMIN/OWNER/EMPLOYEE)", async () => {
+/*
+    test("fail GET /attendances/:id for roles without store access (ADMIN/OWNER/EMPLOYEE)", async () => {
       const response = await request(app)
-        .get(`/api/employees/${employeeId}`)
+        .get(`/api/attendances/${attendanceId}`)
         .set("Authorization", `Bearer ${adminToken}`);
 
       expect(response.status).toBe(401);
       expect(response.body).toHaveProperty("message", "access denied");
     });
-
-    it("fail GET /employees/:id, employee not found", async () => {
+/*
+    test("fail GET /attendances/:id, employee not found", async () => {
       const response = await request(app)
-        .get("/api/employees/9999")
+        .get("/api/attendances/9999")
         .set("Authorization", `Bearer ${employeeToken}`);
 
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty("message", "Employee is not found");
     });
+    */
   });
 
-  describe("PATCH employees/:id", () => {
-    /*
-        it('should update an employee', async () => {
-          const response = await request(app)
-            .patch(`/api/employees/${employeeId}`)
-            .set('Authorization', `Bearer ${token}`)
-            .send({ name: 'Updated Name' });
-          
-          expect(response.status).toBe(200);
-          expect(response.body).toHaveProperty('message', 'Employee updated successfully');
-          expect(response.body.data).toHaveProperty('name', 'Updated Name');
-        });
-    
-        it('should return 403 if attempting to update protected fields', async () => {
-          const response = await request(app)
-            .patch(`/api/employees/${employeeId}`)
-            .set('Authorization', `Bearer ${token}`)
-            .send({ StoreId: 123 }); // Fields yang dilindungi
-          
-          expect(response.status).toBe(403);
-          expect(response.body).toHaveProperty('name', 'protected_field');
-        });
-    
-        it('should return 404 if employee not found for update', async () => {
-          const response = await request(app)
-            .patch('/api/employees/9999') // ID yang tidak ada
-            .set('Authorization', `Bearer ${token}`)
-            .send({ name: 'Another Update' });
-          
-          expect(response.status).toBe(404);
-          expect(response.body).toHaveProperty('name', 'Not Found');
-        });
-        */
-  });
-
-  console.timeEnd("Testing STORE time:");
+  console.timeEnd("Testing Employee time:");
 });

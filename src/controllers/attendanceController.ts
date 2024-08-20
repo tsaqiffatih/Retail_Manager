@@ -63,12 +63,11 @@ export const editAttendance = async (
 
     const attendance = await Attendance.findByPk(id);
     if (!attendance) {
-      return res.status(404).json({ message: "Attendance not found" });
+      throw {name: "Not Found", param: "Attendance"}
     }
 
     await authorizeUser(req, attendance.EmployeeId);
 
-    // Update status dengan validasi
     attendance.status = status;
     await attendance.save();
 

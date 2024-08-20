@@ -49,6 +49,16 @@ export const editEmployee = async (
   try {
     const { id } = req.params;
     const updatedData = req.body;
+    const {
+      firstName,
+      lastName,
+      dateOfBirth,
+      contact,
+      education,
+      position,
+      salary,
+    } = req.body;
+    // firstName lastName dateOfBirth contact education position salary
 
     const protectedFields = ["StoreId", "UserId"];
 
@@ -65,7 +75,27 @@ export const editEmployee = async (
 
     await authorizeUser(req, employee.id);
 
-    await employee.update(updatedData);
+    if (firstName) employee.firstName = firstName;
+    if (lastName) employee.lastName = lastName;
+    if (dateOfBirth) employee.dateOfBirth = dateOfBirth;
+    if (contact) employee.contact = contact;
+    if (education) employee.education = education;
+    if (position) employee.position = position;
+    if (salary) employee.salary = salary;
+
+    if (
+      !firstName &&
+      !lastName &&
+      !dateOfBirth &&
+      !contact &&
+      !education &&
+      !position &&
+      !salary
+    ) {
+      res.status(400).json({ message: "No fields to update found" });
+    }
+
+    await employee.save();
     res.status(200).json({
       message: "Employee updated successfully",
       data: employee,

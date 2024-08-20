@@ -85,6 +85,4 @@ sequelizeConnection.addModels([
   AuditLog,
 ]);
 
-console.log("berjalan di sini");
-
 export default sequelizeConnection;
