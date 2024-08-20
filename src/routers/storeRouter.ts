@@ -22,6 +22,6 @@ router.get(
 );
 
 // delete store include employee and user,payroll,attendance who associated wiht employee
-router.delete("/:id", authorizeRole("OWNER"),auditMiddleware("Store"), destroyStore); 
+router.delete("/:storeId", authorizeRole("OWNER"),auditMiddleware("Store"), destroyStore); 
 
 export default router;

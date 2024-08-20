@@ -29,10 +29,6 @@ export const authorizeUser = async (
     ],
   });
 
-  console.log(user?.employee?.store?.id, "employee<<<<<<<");
-  console.log(userId, "userLogin<<<<<<<");
-  console.log(storeId, "userLoginStoreId<<<<<<<");
-
   if (userRole === "OWNER") {
     if (userId !== user?.employee?.store?.OwnerId) {
       throw { name: "access_denied" };

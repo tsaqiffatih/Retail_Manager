@@ -1,33 +1,6 @@
 import request from "supertest";
-import app, { server } from "../app";
-import sequelizeConnection from "../config/connection";
-import { Sequelize } from "sequelize";
+import app from "../app";
 import { createToken } from "../helper/jsonWebToken";
-
-// Helper function to delete the test database
-const deleteTestDatabase = async () => {
-  const sequelize = new Sequelize(
-    "postgres",
-    process.env.DB_USERNAME as string,
-    process.env.DB_PASSWORD,
-    {
-      host: "127.0.0.1",
-      dialect: "postgres",
-      logging: false,
-    }
-  );
-
-  try {
-    await sequelize.query("DROP DATABASE IF EXISTS database_test");
-  } catch (error) {
-    console.error("Error deleting database:", error);
-  } finally {
-    console.log("========== Test database deleted ==========");
-    await sequelize.close();
-  }
-};
-
-
 
 // Payloads and tokens for testing
 const generateTokens = () => ({
@@ -68,25 +41,6 @@ describe("User Controller Tests", () => {
   const { superAdminToken, ownerToken, adminToken, employeeToken } =
     generateTokens();
 
-    const closeServer = () => {
-      return new Promise<void>((resolve, reject) => {
-        server.close((err) => {
-          if (err) {
-            return reject(err);
-          }
-          resolve();
-        });
-      });
-    };
-
-  // Cleanup after all tests
-  afterAll(async () => {
-    await sequelizeConnection.close();
-    // server.close();
-    await closeServer()
-    await deleteTestDatabase();
-  }, 15000);
-
   // Test block for /login route
   describe("POST /login", () => {
     const loginData = (email: string, password: string) => ({
@@ -99,9 +53,8 @@ describe("User Controller Tests", () => {
         .post("/api/users/login")
         .send(loginData("superAdmin@mail.com", "superAdminPass"));
 
-      const { body, status } = response;
-      expect(status).toBe(200);
-      expect(body).toHaveProperty("access_token", expect.any(String));
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty("access_token", expect.any(String));
     });
 
     test("fail post /login with wrong email", async () => {
@@ -109,9 +62,8 @@ describe("User Controller Tests", () => {
         .post("/api/users/login")
         .send(loginData("wrong@mail.com", "superAdminPass"));
 
-      const { body, status } = response;
-      expect(status).toBe(401);
-      expect(body).toHaveProperty("message", "email or password was wrong");
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty("message", "email or password was wrong");
     });
 
     test("fail post /login with wrong password", async () => {
@@ -119,9 +71,8 @@ describe("User Controller Tests", () => {
         .post("/api/users/login")
         .send(loginData("superAdmin@mail.com", "wrongPass"));
 
-      const { body, status } = response;
-      expect(status).toBe(401);
-      expect(body).toHaveProperty("message", "email or password was wrong");
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty("message", "email or password was wrong");
     });
   });
 
@@ -315,12 +266,12 @@ describe("User Controller Tests", () => {
       username: updatedUserData.userName,
     });
 
-    const updatedEmail = "partialupdate@mail.com"
+    const updatedEmail = "partialupdate@mail.com";
 
     const updatedTokenSecond = createToken({
       email: updatedEmail,
-      username: updatedUserData.userName
-    })
+      username: updatedUserData.userName,
+    });
 
     test("fail patch /edit-user with non-existent user ID", async () => {
       const response = await request(app)
@@ -344,18 +295,20 @@ describe("User Controller Tests", () => {
     });
 
     test("fail patch /edit-user with invalid email format", async () => {
-      const tokenPayload = createToken({email: "partialupdate@mail.com", username: "updatedName"})
+      const tokenPayload = createToken({
+        email: "partialupdate@mail.com",
+        username: "updatedName",
+      });
       const response = await request(app)
         .patch("/api/users/6")
         .send({
           email: "invalid-email-format",
         })
         .set("Authorization", `Bearer ${employeeToken}`);
-    
-      const { body, status } = response;
-      expect(status).toBe(400);
-      expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty("message", "Invalid Email Type");
+
+      expect(response.status).toBe(400);
+      expect(response.body).toBeInstanceOf(Object);
+      expect(response.body).toHaveProperty("message", "Invalid Email Type");
     });
 
     test("fail patch /edit-user with short password", async () => {
@@ -365,10 +318,13 @@ describe("User Controller Tests", () => {
           password: "short",
         })
         .set("Authorization", `Bearer ${employeeToken}`);
-    
+
       expect(response.status).toBe(400);
       expect(response.body).toBeInstanceOf(Object);
-      expect(response.body).toHaveProperty("message", "password must be at least 7 characters long");
+      expect(response.body).toHaveProperty(
+        "message",
+        "password must be at least 7 characters long"
+      );
     });
 
     test("fail patch /edit-user with weak password", async () => {
@@ -394,10 +350,13 @@ describe("User Controller Tests", () => {
           email: "employee2@mail.com",
         })
         .set("Authorization", `Bearer ${employeeToken}`);
-    
+
       expect(response.status).toBe(400);
       expect(response.body).toBeInstanceOf(Object);
-      expect(response.body).toHaveProperty("message", "email has been already exists");
+      expect(response.body).toHaveProperty(
+        "message",
+        "email has been already exists"
+      );
     });
 
     test("fail patch /edit-user as unauthorized role", async () => {
@@ -407,11 +366,10 @@ describe("User Controller Tests", () => {
           userName: "updatedName",
         })
         .set("Authorization", `Bearer ${adminToken}`);
-    
-      const { body, status } = response;
-      expect(status).toBe(403);
-      expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty("message", "Forbidden Access");
+
+      expect(response.status).toBe(403);
+      expect(response.body).toBeInstanceOf(Object);
+      expect(response.body).toHaveProperty("message", "Forbidden Access");
     });
 
     test("success patch /edit-user", async () => {
@@ -437,23 +395,31 @@ describe("User Controller Tests", () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(Object);
-      expect(response.body).toHaveProperty("message", "Success update user data");
-      expect(response.body.data).toHaveProperty("email", "partialupdate@mail.com");
+      expect(response.body).toHaveProperty(
+        "message",
+        "Success update user data"
+      );
+      expect(response.body.data).toHaveProperty(
+        "email",
+        "partialupdate@mail.com"
+      );
     });
 
     test("success patch /edit-user with strong password", async () => {
-      const tokenPayload = createToken({email: "partialupdate@mail.com", username: "updatedName"})
+      const tokenPayload = createToken({
+        email: "partialupdate@mail.com",
+        username: "updatedName",
+      });
       const response = await request(app)
         .patch("/api/users/6")
         .send({
           password: "StrongPass1",
         })
         .set("Authorization", `Bearer ${updatedTokenSecond}`);
-    
-      const { body, status } = response;
-      expect(status).toBe(200);
-      expect(body).toBeInstanceOf(Object);
-      expect(body).toHaveProperty("message", "Success update user data");
+
+      expect(response.status).toBe(200);
+      expect(response.body).toBeInstanceOf(Object);
+      expect(response.body).toHaveProperty("message", "Success update user data");
     });
   });
 });

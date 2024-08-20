@@ -142,7 +142,7 @@ export const destroyStore = async (
   next: NextFunction
 ) => {
   try {
-    const storeId = req.params.id;
+    const storeId = req.params.storeId;
     const userId = req.userData?.id;
 
     const store = await Store.findByPk(storeId, {

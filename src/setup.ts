@@ -1,4 +1,4 @@
-import { Sequelize } from "sequelize";
+import { Sequelize } from 'sequelize';
 import sequelizeConnection from "./config/connection";
 import path from "path";
 import fs from "fs";
@@ -11,6 +11,11 @@ import Employee from "./models/employee";
 import Attendance from "./models/attendance";
 import Payroll from "./models/payroll";
 import AuditLog from "./models/auditlog";
+import app from './app';
+import { createToken } from './helper/jsonWebToken';
+
+const port = 3000;
+let server: any;
 
 export const sequelizeTest = new Sequelize(
   "postgres",
@@ -26,6 +31,8 @@ export const sequelizeTest = new Sequelize(
 const createTestDatabase = async () => {
   try {
     await sequelizeTest.query("CREATE DATABASE database_test");
+    console.log("database_test created");
+    
   } catch (error) {
     if (error instanceof Error) {
       if (
@@ -42,19 +49,10 @@ const createTestDatabase = async () => {
       console.log(`====== Re-throw if the error is not an instance of Error ${error}======`);
       throw error; // Re-throw if the error is not an instance of Error
     }
-  } finally {
-    // await sequelizeTest.close();
-    console.log("========== create database done ==========")
-  }
+  } 
 };
 
 const seedingDatabase = async () => {
-  console.time("Seeding Database Time")
-  console.log("======= Setting up test database... =======");
-  await createTestDatabase();
-
-  console.log("========== Syncing database schema... ==========");
-  await sequelizeConnection.sync({ force: true });
 
   // ==> seeding user data to database test <==\\
   console.log("========== Seeding user data... ==========");
@@ -175,7 +173,51 @@ const seedingDatabase = async () => {
   await AuditLog.bulkCreate(auditLogData);
   console.log("=========== AuditLog data seeded... ===========");
   // ==> seeding auditLog data to database test <==\\
-  console.timeEnd("Seeding Database Time");
 };
 
-export default seedingDatabase
+const deleteTestDatabase = async () => {
+  try {
+    await sequelizeTest.query("DROP DATABASE IF EXISTS database_test");
+  } catch (error) {
+    console.error("Error deleting database:", error);
+  } 
+};
+
+// Setup global environment sebelum semua tes
+// 
+beforeAll(async () => {
+  console.time("Start setup beforeAll")
+  console.log("======= Setting up test database... =======");
+
+  console.log("========== Start create database ==========")
+  await createTestDatabase();
+  console.log("========== create database done ==========")
+
+  console.log("========== Syncing database schema... ==========");
+  await sequelizeConnection.sync({ force: true });
+
+  await seedingDatabase()
+
+  // Menjalankan server Express
+  server = app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+  });
+  console.timeEnd("Start setup beforeAll");
+},10000);
+
+// Cleanup global environment setelah semua tes
+afterAll(async () => {
+  // Menutup server
+  if (server) {
+    server.close();
+  }
+
+  // Menutup koneksi ke database
+  await sequelizeConnection.close();
+
+  console.log("========== Start delete database ==========");
+  await deleteTestDatabase()
+  console.log("========== Test database deleted ==========");
+
+  await sequelizeTest.close()
+});
