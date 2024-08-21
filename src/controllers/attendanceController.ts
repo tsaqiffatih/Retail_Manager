@@ -105,7 +105,7 @@ export const generateAttendanceReport = async (
     let whereCondition: any = {};
 
     // Filter by EmployeeId
-    if (EmployeeId) {
+    if (EmployeeId && userRole !== "EMPLOYEE") {
       whereCondition.EmployeeId = EmployeeId;
     }
 
@@ -135,6 +135,8 @@ export const generateAttendanceReport = async (
     } else if (userRole === "SUPER ADMIN") {
       whereRoleCondition = {};
       isRequired = false;
+    } else if (userRole === "EMPLOYEE") {
+      whereCondition.EmployeeId = userId
     } else {
       throw { name: "access_denied" };
     }

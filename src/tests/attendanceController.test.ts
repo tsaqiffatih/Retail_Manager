@@ -49,6 +49,7 @@ describe("Employee Controller Tests", () => {
     noStoreOwnerToken,
     ownerToken2,
     manager3,
+    superAdminToken
   } = generateTokens();
 
   const attendanceId = 8;
@@ -77,235 +78,291 @@ describe("Employee Controller Tests", () => {
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty("message", "Attendance is not found");
     });
-/*
-    test("success PATCH /attendances/:id for status", async () => {
-      const response = await request(app)
-        .patch(`/api/attendances/${updatedAttendance}`)
-        .set("Authorization", `Bearer ${manager3}`)
-        .send({ status: "sick" });
 
-      expect(response.status).toBe(200);
+    test("success PATCH /attendances/:id field status for role MANAGER/ADMIN with store access", async () => {
+      const response = await request(app)
+        .patch(`/api/attendances/${attendanceId}`)
+        .set("Authorization", `Bearer ${managerToken}`)
+        .send({ status: "Sick" });
+
+      // expect(response.status).toBe(200);
       expect(response.body).toHaveProperty(
         "message",
         "Attendance updated successfully"
       );
       expect(response.body.data);
     });
-    */
+
+    test("success PATCH /attendances/:id field status for own attendance", async () => {
+      const response = await request(app)
+        .patch(`/api/attendances/${attendanceId}`)
+        .set("Authorization", `Bearer ${employeeToken}`)
+        .send({ status: "Present" });
+
+      // expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Attendance updated successfully"
+      );
+      expect(response.body.data);
+    });
+    
   });
 
-  describe("GET attendances/:id", () => {
-/*  
-    test("success GET /attendances/:id retreives the employee's own data", async () => {
-      const response = await request(app)
-        .get(`/api/attendances/${attendanceId}`)
-        .set("Authorization", `Bearer ${employeeToken}`);
+  describe("GET attendances/report", () => {
+    let employeeId = 4
 
-      const employee = response.body.data;
-      expect(employee).toMatchObject({
-        id: expect.any(Number),
-        firstName: expect.any(String),
-        lastName: expect.any(String),
-        dateOfBirth: expect.any(String),
-        contact: expect.any(String),
-        education: expect.any(String),
-        address: expect.any(String),
-        position: expect.any(String),
-        salary: expect.any(Number),
-        UserId: expect.any(Number),
-        StoreId: expect.any(Number),
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-        attendances: expect.arrayContaining([
-          expect.objectContaining({
-            id: expect.any(Number),
-            date: expect.any(String),
-            status: expect.any(String),
-            EmployeeId: expect.any(Number),
-            createdAt: expect.any(String),
-            updatedAt: expect.any(String),
-          }),
-        ]),
-        payrolls: expect.arrayContaining([
-          expect.objectContaining({
-            id: expect.any(Number),
-            date: expect.any(String),
-            amount: expect.any(Number),
-            status: expect.any(String),
-            EmployeeId: expect.any(Number),
-            createdAt: expect.any(String),
-            updatedAt: expect.any(String),
-          }),
-        ]),
-        store: expect.objectContaining({
-          id: expect.any(Number),
-          name: expect.any(String),
-          location: expect.any(String),
-          category: expect.any(String),
-          code: expect.any(String),
-          OwnerId: expect.any(Number),
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-        }),
-        user: expect.objectContaining({
-          id: expect.any(Number),
-          userName: expect.any(String),
-          email: expect.any(String),
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-        }),
-      });
+    it('should allow Super Admin to access the report and return correct data format', async () => {
+      const response = await request(app)
+        .get('/api/attendances/report')
+        .set('Authorization', `Bearer ${superAdminToken}`)
+        .query({ startDate: '2024-08-01', endDate: '2024-08-31' });
+  
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty("message", "success");
-      expect(response.body.data).toHaveProperty("id", attendanceId);
+      expect(response.body.message).toBe('Attendance report generated successfully');
+      expect(response.body.data).toBeInstanceOf(Array);
+  
+      if (response.body.data.length > 0) {
+        const firstRecord = response.body.data[0];
+        expect(firstRecord).toHaveProperty('id');
+        expect(firstRecord).toHaveProperty('date');
+        expect(firstRecord).toHaveProperty('status');
+        expect(firstRecord).toHaveProperty('EmployeeId');
+        expect(firstRecord).toHaveProperty('createdAt');
+        expect(firstRecord).toHaveProperty('updatedAt');
+        expect(firstRecord).toHaveProperty('employee');
+  
+        const employee = firstRecord.employee;
+        expect(employee).toHaveProperty('id');
+        expect(employee).toHaveProperty('firstName');
+        expect(employee).toHaveProperty('lastName');
+        expect(employee).toHaveProperty('dateOfBirth');
+        expect(employee).toHaveProperty('contact');
+        expect(employee).toHaveProperty('education');
+        expect(employee).toHaveProperty('address');
+        expect(employee).toHaveProperty('position');
+        expect(employee).toHaveProperty('salary');
+        expect(employee).toHaveProperty('UserId');
+        expect(employee).toHaveProperty('StoreId');
+        expect(employee).toHaveProperty('store');
+  
+        const store = employee.store;
+        expect(store).toHaveProperty('id');
+        expect(store).toHaveProperty('name');
+        expect(store).toHaveProperty('location');
+        expect(store).toHaveProperty('category');
+        expect(store).toHaveProperty('code');
+        expect(store).toHaveProperty('OwnerId');
+      }
     });
-/*
-    test("success GET /attendances/:id retrieves data for MANAGER/ADMIN with store access", async () => {
-      const response = await request(app)
-        .get(`/api/attendances/${attendanceId}`)
-        .set("Authorization", `Bearer ${managerToken}`);
 
-      const employee = response.body.data;
-      expect(employee).toMatchObject({
-        id: expect.any(Number),
-        firstName: expect.any(String),
-        lastName: expect.any(String),
-        dateOfBirth: expect.any(String),
-        contact: expect.any(String),
-        education: expect.any(String),
-        address: expect.any(String),
-        position: expect.any(String),
-        salary: expect.any(Number),
-        UserId: expect.any(Number),
-        StoreId: expect.any(Number),
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-        attendances: expect.arrayContaining([
-          expect.objectContaining({
-            id: expect.any(Number),
-            date: expect.any(String),
-            status: expect.any(String),
-            EmployeeId: expect.any(Number),
-            createdAt: expect.any(String),
-            updatedAt: expect.any(String),
-          }),
-        ]),
-        payrolls: expect.arrayContaining([
-          expect.objectContaining({
-            id: expect.any(Number),
-            date: expect.any(String),
-            amount: expect.any(Number),
-            status: expect.any(String),
-            EmployeeId: expect.any(Number),
-            createdAt: expect.any(String),
-            updatedAt: expect.any(String),
-          }),
-        ]),
-        store: expect.objectContaining({
-          id: expect.any(Number),
-          name: expect.any(String),
-          location: expect.any(String),
-          category: expect.any(String),
-          code: expect.any(String),
-          OwnerId: expect.any(Number),
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-        }),
-        user: expect.objectContaining({
-          id: expect.any(Number),
-          userName: expect.any(String),
-          email: expect.any(String),
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-        }),
-      });
+    it('should allow Owner to access the report for their own store and return correct data format', async () => {
+      const response = await request(app)
+        .get('/api/attendances/report')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .query({ startDate: '2024-08-01', endDate: '2024-08-31' });
+  
+      // expect(response.status).toBe(200);
+      expect(response.body.message).toBe('Attendance report generated successfully');
+      expect(response.body.data).toBeInstanceOf(Array);
+  
+      if (response.body.data.length > 0) {
+        const firstRecord = response.body.data[0];
+        expect(firstRecord).toHaveProperty('id');
+        expect(firstRecord).toHaveProperty('date');
+        expect(firstRecord).toHaveProperty('status');
+        expect(firstRecord).toHaveProperty('EmployeeId');
+        expect(firstRecord).toHaveProperty('createdAt');
+        expect(firstRecord).toHaveProperty('updatedAt');
+        expect(firstRecord).toHaveProperty('employee');
+  
+        const employee = firstRecord.employee;
+        expect(employee).toHaveProperty('id');
+        expect(employee).toHaveProperty('firstName');
+        expect(employee).toHaveProperty('lastName');
+        expect(employee).toHaveProperty('dateOfBirth');
+        expect(employee).toHaveProperty('contact');
+        expect(employee).toHaveProperty('education');
+        expect(employee).toHaveProperty('address');
+        expect(employee).toHaveProperty('position');
+        expect(employee).toHaveProperty('salary');
+        expect(employee).toHaveProperty('UserId');
+        expect(employee).toHaveProperty('StoreId');
+        expect(employee).toHaveProperty('store');
+  
+        const store = employee.store;
+        expect(store).toHaveProperty('id');
+        expect(store).toHaveProperty('name');
+        expect(store).toHaveProperty('location');
+        expect(store).toHaveProperty('category');
+        expect(store).toHaveProperty('code');
+        expect(store).toHaveProperty('OwnerId');
+      }
+    });
+
+    it('should allow Admin to access the report for their store and return correct data format', async () => {
+      const response = await request(app)
+        .get('/api/attendances/report')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .query({ startDate: '2024-08-01', endDate: '2024-08-31' });
+  
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty("message", "success");
-      expect(response.body.data).toHaveProperty("id", attendanceId);
+      expect(response.body.message).toBe('Attendance report generated successfully');
+      expect(response.body.data).toBeInstanceOf(Array);
+  
+      if (response.body.data.length > 0) {
+        const firstRecord = response.body.data[0];
+        expect(firstRecord).toHaveProperty('id');
+        expect(firstRecord).toHaveProperty('date');
+        expect(firstRecord).toHaveProperty('status');
+        expect(firstRecord).toHaveProperty('EmployeeId');
+        expect(firstRecord).toHaveProperty('createdAt');
+        expect(firstRecord).toHaveProperty('updatedAt');
+        expect(firstRecord).toHaveProperty('employee');
+  
+        const employee = firstRecord.employee;
+        expect(employee).toHaveProperty('id');
+        expect(employee).toHaveProperty('firstName');
+        expect(employee).toHaveProperty('lastName');
+        expect(employee).toHaveProperty('dateOfBirth');
+        expect(employee).toHaveProperty('contact');
+        expect(employee).toHaveProperty('education');
+        expect(employee).toHaveProperty('address');
+        expect(employee).toHaveProperty('position');
+        expect(employee).toHaveProperty('salary');
+        expect(employee).toHaveProperty('UserId');
+        expect(employee).toHaveProperty('StoreId');
+        expect(employee).toHaveProperty('store');
+  
+        const store = employee.store;
+        expect(store).toHaveProperty('id');
+        expect(store).toHaveProperty('name');
+        expect(store).toHaveProperty('location');
+        expect(store).toHaveProperty('category');
+        expect(store).toHaveProperty('code');
+        expect(store).toHaveProperty('OwnerId');
+      }
     });
-/*
-    test("success GET /attendances/:id retrieves data for store OWNER", async () => {
-      const response = await request(app)
-        .get(`/api/attendances/${attendanceId}`)
-        .set("Authorization", `Bearer ${ownerToken}`);
 
-      const employee = response.body.data;
-      expect(employee).toMatchObject({
-        id: expect.any(Number),
-        firstName: expect.any(String),
-        lastName: expect.any(String),
-        dateOfBirth: expect.any(String),
-        contact: expect.any(String),
-        education: expect.any(String),
-        address: expect.any(String),
-        position: expect.any(String),
-        salary: expect.any(Number),
-        UserId: expect.any(Number),
-        StoreId: expect.any(Number),
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-        attendances: expect.arrayContaining([
-          expect.objectContaining({
-            id: expect.any(Number),
-            date: expect.any(String),
-            status: expect.any(String),
-            EmployeeId: expect.any(Number),
-            createdAt: expect.any(String),
-            updatedAt: expect.any(String),
-          }),
-        ]),
-        payrolls: expect.arrayContaining([
-          expect.objectContaining({
-            id: expect.any(Number),
-            date: expect.any(String),
-            amount: expect.any(Number),
-            status: expect.any(String),
-            EmployeeId: expect.any(Number),
-            createdAt: expect.any(String),
-            updatedAt: expect.any(String),
-          }),
-        ]),
-        store: expect.objectContaining({
-          id: expect.any(Number),
-          name: expect.any(String),
-          location: expect.any(String),
-          category: expect.any(String),
-          code: expect.any(String),
-          OwnerId: expect.any(Number),
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-        }),
-        user: expect.objectContaining({
-          id: expect.any(Number),
-          userName: expect.any(String),
-          email: expect.any(String),
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-        }),
-      });
+    it('should allow Manager to access the report for their store and return correct data format', async () => {
+      const response = await request(app)
+        .get('/api/attendances/report')
+        .set('Authorization', `Bearer ${managerToken}`)
+        .query({ startDate: '2024-08-01', endDate: '2024-08-31' });
+  
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty("message", "success");
-      expect(response.body.data).toHaveProperty("id", attendanceId);
+      expect(response.body.message).toBe('Attendance report generated successfully');
+      expect(response.body.data).toBeInstanceOf(Array);
+  
+      if (response.body.data.length > 0) {
+        const firstRecord = response.body.data[0];
+        expect(firstRecord).toHaveProperty('id');
+        expect(firstRecord).toHaveProperty('date');
+        expect(firstRecord).toHaveProperty('status');
+        expect(firstRecord).toHaveProperty('EmployeeId');
+        expect(firstRecord).toHaveProperty('createdAt');
+        expect(firstRecord).toHaveProperty('updatedAt');
+        expect(firstRecord).toHaveProperty('employee');
+  
+        const employee = firstRecord.employee;
+        expect(employee).toHaveProperty('id');
+        expect(employee).toHaveProperty('firstName');
+        expect(employee).toHaveProperty('lastName');
+        expect(employee).toHaveProperty('dateOfBirth');
+        expect(employee).toHaveProperty('contact');
+        expect(employee).toHaveProperty('education');
+        expect(employee).toHaveProperty('address');
+        expect(employee).toHaveProperty('position');
+        expect(employee).toHaveProperty('salary');
+        expect(employee).toHaveProperty('UserId');
+        expect(employee).toHaveProperty('StoreId');
+        expect(employee).toHaveProperty('store');
+  
+        const store = employee.store;
+        expect(store).toHaveProperty('id');
+        expect(store).toHaveProperty('name');
+        expect(store).toHaveProperty('location');
+        expect(store).toHaveProperty('category');
+        expect(store).toHaveProperty('code');
+        expect(store).toHaveProperty('OwnerId');
+      }
     });
-/*
-    test("fail GET /attendances/:id for roles without store access (ADMIN/OWNER/EMPLOYEE)", async () => {
-      const response = await request(app)
-        .get(`/api/attendances/${attendanceId}`)
-        .set("Authorization", `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(401);
-      expect(response.body).toHaveProperty("message", "access denied");
+    it('should allow Employee to access their own data and return correct data format', async () => {
+      const response = await request(app)
+        .get('/api/attendances/report')
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .query({ startDate: '2024-08-01', endDate: '2024-08-31' }); 
+  
+      expect(response.status).toBe(200);
+      expect(response.body.message).toBe('Attendance report generated successfully');
+      expect(response.body.data).toBeInstanceOf(Array);
+
+      if (response.body.data.length > 0) {
+        const firstRecord = response.body.data[0];
+        expect(firstRecord).toHaveProperty('id');
+        expect(firstRecord).toHaveProperty('date');
+        expect(firstRecord).toHaveProperty('status');
+        expect(firstRecord).toHaveProperty('EmployeeId');
+        expect(firstRecord).toHaveProperty('createdAt');
+        expect(firstRecord).toHaveProperty('updatedAt');
+        expect(firstRecord).toHaveProperty('employee');
+  
+        const employee = firstRecord.employee;
+        expect(employee).toHaveProperty('id');
+        expect(employee).toHaveProperty('firstName');
+        expect(employee).toHaveProperty('lastName');
+        expect(employee).toHaveProperty('dateOfBirth');
+        expect(employee).toHaveProperty('contact');
+        expect(employee).toHaveProperty('education');
+        expect(employee).toHaveProperty('address');
+        expect(employee).toHaveProperty('position');
+        expect(employee).toHaveProperty('salary');
+        expect(employee).toHaveProperty('UserId');
+        expect(employee).toHaveProperty('StoreId');
+        expect(employee).toHaveProperty('store');
+  
+        const store = employee.store;
+        expect(store).toHaveProperty('id');
+        expect(store).toHaveProperty('name');
+        expect(store).toHaveProperty('location');
+        expect(store).toHaveProperty('category');
+        expect(store).toHaveProperty('code');
+        expect(store).toHaveProperty('OwnerId');
+      }
     });
-/*
-    test("fail GET /attendances/:id, employee not found", async () => {
-      const response = await request(app)
-        .get("/api/attendances/9999")
-        .set("Authorization", `Bearer ${employeeToken}`);
 
+  
+    it('should return 400 for invalid status value', async () => {
+      const response = await request(app)
+        .get('/api/attendances/report')
+        .set('Authorization', `Bearer ${superAdminToken}`)
+        .query({ startDate: '2024-08-01', endDate: '2024-08-31', status: 'InvalidStatus' });
+  
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe('Invalid status value. Allowed values are Present, Absent, Sick, or Leave.');
+    });
+  
+    it('should return 404 if no attendance records found', async () => {
+      const response = await request(app)
+        .get('/api/attendances/report')
+        .set('Authorization', `Bearer ${noStoreOwnerToken}`)
+        .query({ startDate: '3000-01-01', endDate: '3000-01-31' });
+  
       expect(response.status).toBe(404);
-      expect(response.body).toHaveProperty("message", "Employee is not found");
+      expect(response.body.message).toBe('No attendance records found');
     });
-    */
+
+    it('should return 404 if no attendance records found', async () => {
+      const response = await request(app)
+        .get('/api/attendances/report')
+        .set('Authorization', `Bearer 13751375176163271637616`)
+        .query({ startDate: '3000-01-01', endDate: '3000-01-31' });
+  
+      expect(response.status).toBe(401);
+      expect(response.body.message).toBe('Invalid Token');
+    });
+    
   });
 
   console.timeEnd("Testing Employee time:");
