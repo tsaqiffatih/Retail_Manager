@@ -7,10 +7,6 @@ const generateTokens = () => ({
     email: "superAdmin@mail.com",
     username: "superAdmin",
   }),
-  noStoreOwnerToken: createToken({
-    email: "owner3mail.com",
-    username: "owner3Boss",
-  }),
   ownerToken: createToken({
     email: "owner1@mail.com",
     username: "owner1Pass",
@@ -29,24 +25,24 @@ const generateTokens = () => ({
     username: "employee1Pass",
     // storeId => 1 name => emily
   }),
-  ownerToken2: createToken({
-    email: "owner2@mail.com",
-    username: "owner21",
+  manager3: createToken({
+    email: "managerBoss21@mail.com",
+    username: "managerBoss21",
   }),
 });
 
 describe("Employee Controller Tests", () => {
-  console.time("Testing STORE time:");
+  console.time("Testing Employee time:");
   const {
     ownerToken,
     adminToken,
     employeeToken,
     managerToken,
-    noStoreOwnerToken,
-    ownerToken2,
+    manager3,
   } = generateTokens();
 
   const employeeId = 4;
+  const updatedEmployee = 7 //role Manager and role Admin are classified as Employees. 
 
   describe("GET employees/:id", () => {
     it("success GET /employees/:id retreives the employee's own data", async () => {
@@ -261,39 +257,69 @@ describe("Employee Controller Tests", () => {
   });
 
   describe("PATCH employees/:id", () => {
-    /*
-        it('should update an employee', async () => {
-          const response = await request(app)
-            .patch(`/api/employees/${employeeId}`)
-            .set('Authorization', `Bearer ${token}`)
-            .send({ name: 'Updated Name' });
-          
-          expect(response.status).toBe(200);
-          expect(response.body).toHaveProperty('message', 'Employee updated successfully');
-          expect(response.body.data).toHaveProperty('name', 'Updated Name');
-        });
-    
-        it('should return 403 if attempting to update protected fields', async () => {
-          const response = await request(app)
-            .patch(`/api/employees/${employeeId}`)
-            .set('Authorization', `Bearer ${token}`)
-            .send({ StoreId: 123 }); // Fields yang dilindungi
-          
-          expect(response.status).toBe(403);
-          expect(response.body).toHaveProperty('name', 'protected_field');
-        });
-    
-        it('should return 404 if employee not found for update', async () => {
-          const response = await request(app)
-            .patch('/api/employees/9999') // ID yang tidak ada
-            .set('Authorization', `Bearer ${token}`)
-            .send({ name: 'Another Update' });
-          
-          expect(response.status).toBe(404);
-          expect(response.body).toHaveProperty('name', 'Not Found');
-        });
-        */
+    it("fail PATCH /employees/:id for protected fields (StoreId)", async () => {
+      const response = await request(app)
+        .patch(`/api/employees/${employeeId}`)
+        .set("Authorization", `Bearer ${employeeToken}`)
+        .send({ StoreId: 123 });
+
+      expect(response.status).toBe(403);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Field StoreId is protected and cannot be updated"
+      );
+    });
+
+    it("fail PATCH /employees/:id for protected fields (UserId)", async () => {
+      const response = await request(app)
+        .patch(`/api/employees/${employeeId}`)
+        .set("Authorization", `Bearer ${employeeToken}`)
+        .send({ UserId: 123 });
+
+      expect(response.status).toBe(403);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Field UserId is protected and cannot be updated"
+      );
+    });
+
+    it("fail PATCH /employees/:id for invalid fields are sent", async () => {
+      const response = await request(app)
+        .patch(`/api/employees/${employeeId}`)
+        .set("Authorization", `Bearer ${employeeToken}`)
+        .send({ userName: "budiSusanto" });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty(
+        "message",
+        "No fields to update found"
+      );
+    });
+
+    it("fail PATCH /employees/:id for employee not found", async () => {
+      const response = await request(app)
+        .patch(`/api/employees/999`)
+        .set("Authorization", `Bearer ${employeeToken}`)
+        .send({ firstName: "budiSusanto" });
+
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty("message", "Employee is not found");
+    });
+
+    it("should update an employee", async () => {
+      const response = await request(app)
+        .patch(`/api/employees/${updatedEmployee}`)
+        .set("Authorization", `Bearer ${manager3}`)
+        .send({ firstName: "Updated Name" });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Employee updated successfully"
+      );
+      expect(response.body.data);
+    });
   });
 
-  console.timeEnd("Testing STORE time:");
+  console.timeEnd("Testing Employee time:");
 });

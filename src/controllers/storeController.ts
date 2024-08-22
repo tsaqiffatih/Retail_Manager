@@ -188,6 +188,8 @@ export const editStore = async (
   try {
     const id = req.params.id;
     const userId = req.userData?.id;
+    const {name, location, category} = req.body
+    // name location category 
 
     const store = await Store.findByPk(id);
 
@@ -197,7 +199,15 @@ export const editStore = async (
       throw { name: "access_denied" };
     }
 
-    await store.update(req.body);
+    if (name) store.name = name
+    if (location) store.location = location
+    if (category) store.category = category
+
+    if (!name && !location && !category) {
+      res.status(400).json({message: "No fields to update found"})
+    }
+
+    await store.save();
 
     res.status(200).json({
       message: "Success update store data",

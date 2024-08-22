@@ -67,7 +67,7 @@ const errorHandler = (err: CustomError, req: Request, res: Response, next: NextF
         status = 400;
         message = "Please, choose other role for user";
     } else if (name === 'protected_field') {
-        status = 400;
+        status = 403;
         message = `Field ${param} is protected and cannot be updated`;
     } else if (name === 'Invalid_ID_Parameter') {
         status = 400;

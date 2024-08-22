@@ -63,12 +63,11 @@ export const editAttendance = async (
 
     const attendance = await Attendance.findByPk(id);
     if (!attendance) {
-      return res.status(404).json({ message: "Attendance not found" });
+      throw {name: "Not Found", param: "Attendance"}
     }
 
     await authorizeUser(req, attendance.EmployeeId);
 
-    // Update status dengan validasi
     attendance.status = status;
     await attendance.save();
 
@@ -106,7 +105,7 @@ export const generateAttendanceReport = async (
     let whereCondition: any = {};
 
     // Filter by EmployeeId
-    if (EmployeeId) {
+    if (EmployeeId && userRole !== "EMPLOYEE") {
       whereCondition.EmployeeId = EmployeeId;
     }
 
@@ -136,6 +135,8 @@ export const generateAttendanceReport = async (
     } else if (userRole === "SUPER ADMIN") {
       whereRoleCondition = {};
       isRequired = false;
+    } else if (userRole === "EMPLOYEE") {
+      whereCondition.EmployeeId = userId
     } else {
       throw { name: "access_denied" };
     }

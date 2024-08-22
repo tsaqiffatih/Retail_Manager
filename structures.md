@@ -82,18 +82,22 @@ RETAIL_MANAGER/
 │   │   └── 20240727200037-auditLog-seed-initial.js
 │   │
 │   ├── tests/
+│   │   ├── attendanceController.test.ts
+│   │   ├── employeeController.test.ts
+│   │   ├── payrollController.test.ts
+│   │   ├── storeController.test.ts
 │   │   └── userController.test.ts
 │   │
 │   ├── app.ts
-│   └── jest.setup.ts
+│   └── setup.ts
 │
 ├── .env
 ├── .env.example
 ├── .gitignore
 ├── .sequelizerc
-├── auth.md
 ├── package-lock.json
 ├── package.json
+├── payloadUser.md
 ├── README.md
 ├── structures.md
 └── tsconfig.json

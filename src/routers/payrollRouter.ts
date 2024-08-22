@@ -10,10 +10,11 @@ const router = express.Router();
 // router.get("/testing" ,testingScheduler)
 router.use(authentication);
 
-// Route untuk memperbarui data gaji
-router.patch("/:id", auditMiddleware("Payroll"), editPayroll);
-
 // Route untuk menghasilkan laporan gaji (opsional)
-router.get("/report", generatePayrollReport);
+router.get("/report",authorizeRole("ADMIN","MANAGER", "OWNER","SUPER ADMIN"), generatePayrollReport);
+
+// Route untuk memperbarui data gaji
+router.patch("/:id", authorizeRole("ADMIN","MANAGER", "OWNER"),auditMiddleware("Payroll"), editPayroll);
+
 
 export default router;
