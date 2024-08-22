@@ -6,7 +6,9 @@
   "scripts": {
     "pretest": "cross-env NODE_ENV=test",
     "test": "cross-env NODE_ENV=test jest --detectOpenHandles",
-    "dev": "nodemon src/app.ts"
+    "dev": "nodemon src/app.ts",
+    "build" : "tsc",
+    "heroku-postbuild": "npm run build"
   },
   "keywords": [],
   "author": "",
