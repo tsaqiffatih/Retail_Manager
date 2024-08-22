@@ -6,7 +6,19 @@
     "EmployeeId": 1
   },
   {
+    "date": "2024-08-02",
+    "amount": 2500000,
+    "status": "PAID",
+    "EmployeeId": 1
+  },
+  {
     "date": "2024-08-01",
+    "amount": 5000000,
+    "status": "PAID",
+    "EmployeeId": 2
+  },
+  {
+    "date": "2024-08-02",
     "amount": 5000000,
     "status": "PAID",
     "EmployeeId": 2
@@ -18,7 +30,19 @@
     "EmployeeId": 3
   },
   {
+    "date": "2024-08-02",
+    "amount": 3000000,
+    "status": "PAID",
+    "EmployeeId": 3
+  },
+  {
     "date": "2024-08-01",
+    "amount": 2500000,
+    "status": "PAID",
+    "EmployeeId": 4
+  },
+  {
+    "date": "2024-08-02",
     "amount": 2500000,
     "status": "PAID",
     "EmployeeId": 4
@@ -30,13 +54,31 @@
     "EmployeeId": 5
   },
   {
+    "date": "2024-08-02",
+    "amount": 2500000,
+    "status": "PAID",
+    "EmployeeId": 5
+  },
+  {
     "date": "2024-08-01",
     "amount": 2500000,
     "status": "PAID",
     "EmployeeId": 6
   },
   {
+    "date": "2024-08-02",
+    "amount": 2500000,
+    "status": "PAID",
+    "EmployeeId": 6
+  },
+  {
     "date": "2024-08-01",
+    "amount": 2500000,
+    "status": "PAID",
+    "EmployeeId": 7
+  },
+  {
+    "date": "2024-08-02",
     "amount": 2500000,
     "status": "PAID",
     "EmployeeId": 7

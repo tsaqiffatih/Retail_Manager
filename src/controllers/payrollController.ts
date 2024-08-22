@@ -14,12 +14,11 @@ export const editPayroll = async (
 ) => {
   try {
     const { id } = req.params;
-    const updatedData = req.body;
     const { amount, status } = req.body;
 
     const payroll = await Payroll.findByPk(id);
     if (!payroll) {
-      return res.status(404).json({ message: "Payroll not found" });
+      throw { name: "Not Found", param: "Payroll" };
     }
 
     await authorizeUser(req, payroll.EmployeeId);
@@ -97,9 +96,6 @@ export const generatePayrollReport = async (
       whereRoleCondition = { OwnerId: userId };
     } else if (userRole === "ADMIN" || userRole === "MANAGER") {
       whereRoleCondition = { id: userStoreId };
-    } else if (userRole === "SUPER ADMIN") {
-      whereRoleCondition = {};
-      isRequired = false;
     } else {
       throw { name: "access_denied" };
     }
