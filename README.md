@@ -21,8 +21,7 @@ A comprehensive backend system for managing retail stores, employees, attendance
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/retail_manager_backend.git
-   cd retail_manager_backend
+   git clone https://github.com/your-username/Retail_Manager.git
    ```
 
 2. Install dependencies:
@@ -38,14 +37,19 @@ A comprehensive backend system for managing retail stores, employees, attendance
    ```bash
    cp .env.example .env
    ```
+4. Run database create:
 
-4. Run database migrations:
+   ```bash
+   npx sequelize-cli db:create
+   ```
+
+5. Run database migrations:
 
    ```bash
    npx sequelize-cli db:migrate
    ```
 
-5. Seed the database (optional):
+6. Seed the database (optional):
 
    ```bash
    npx sequelize-cli db:seed:all
@@ -94,9 +98,9 @@ RETAIL_MANAGER/
 ├── .env.example                # Example environment configuration
 ├── .gitignore                  # Git ignore file
 ├── .sequelizerc                # Sequelize configuration
-├── auth.md                     # Authentication documentation
 ├── package-lock.json           # NPM package lock file
 ├── package.json                # Node.js dependencies and scripts
+├── payloadUser.md              # Authentication documentation
 ├── README.md                   # Project documentation
 ├── structures.md               # Documentation of project structure
 └── tsconfig.json               # TypeScript configuration
@@ -107,13 +111,12 @@ RETAIL_MANAGER/
 The following environment variables are required to run the application:
 
 - `NODE_ENV`: Application environment (`development`, `production`, `test`)
-- `DB_HOST`: Database host
-- `DB_PORT`: Database port
-- `DB_NAME`: Database name
-- `DB_USERNAME`: Database username
-- `DB_PASSWORD`: Database password
-- `JWT_SECRET`: Secret key for JWT authentication
-- `PORT`: Port for the Express server (default: 3000)
+- `SECRET`: Secret key for JWT authentication
+- `APP_NAME`: Aplication name will show in log terminal
+- `APP_PORT`: Port for the Express server (default: 3000)
+- `DEV_DATABASE_URL`: Database URL for development
+- `TEST_DATABASE_URL`: Database URL for test
+- `PROD_DATABASE_URL`: Database URL for production
 
 ## API Documentation
 
@@ -136,6 +139,7 @@ This application uses Jest for testing. All test files are located in the `src/t
 
 - **Role-Based Access Control (RBAC)**: Different roles (Admin, Owner, Manager, Employee) with different levels of access.
 - **Comprehensive API**: Manage users, stores, employees, attendance, and payroll.
+- **Automatic Payroll Creation**: Default payroll status is set to UNPAID and amount is set from sallary in Employee field at the start of each month
 - **Automatic Payroll Processing**: Payroll calculations based on attendance data.
 - **Daily Attendance Creation**: Default attendance status is set to 'Absent' at the start of each day.
 

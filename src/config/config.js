@@ -1,27 +1,27 @@
-const dotenv = require('dotenv')
+const dotenv = require("dotenv");
 
-dotenv.config()
+dotenv.config();
+// console.log("DATABASE_URL:", process.env.DATABASE_URL);
+console.log("DATABASE_URL_DEVELOPMENT:", process.env.DATABASE_URL_DEVELOPMENT);
+// postgres://username:password@host:port/database_name
+
 
 module.exports = {
-  "development": {
-    "username": process.env.DB_USERNAME,
-    "password": process.env.DB_PASSWORD,
-    "database": process.env.DB_NAME,
-    "host": process.env.DB_HOST,
-    "dialect": "postgres"
+  development: {
+    "url": process.env.DEV_DATABASE_URL,
+    "dialect": "postgres",
   },
-  "test": {
-    "username": "root",
-    "password": null,
-    "database": "database_test",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
+  test: {
+    "url": process.env.TEST_DATABASE_URL,
+    "dialect": "postgres",
   },
-  "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
-  }
-}
+  production: {
+    "url": process.env.PROD_DATABASE_URL,
+    "dialect": "postgres",
+    "dialectOptions": {
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    },
+  },
+};

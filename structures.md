@@ -99,7 +99,6 @@ RETAIL_MANAGER/
 ├── package.json
 ├── payloadUser.md
 ├── README.md
-├── Procfile
 ├── structures.md
 └── tsconfig.json
 ```
