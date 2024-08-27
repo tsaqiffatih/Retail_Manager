@@ -1,30 +1,27 @@
-version: '3.8'
+
 services:
   app:
     build: .
     ports:
       - "3000:3000"
+    env_file:
+      - .env.docker
     environment:
-      NODE_ENV: development
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USERNAME: postgres
-      DB_PASSWORD: example
-      DB_NAME: retail_manager
+      NODE_ENV: development  # Override NODE_ENV to development
     depends_on:
       - db
     volumes:
       - .:/app
-    command: NODE_ENV=production npm run dev
+    command: npm run dev # Use dev script during development
 
   db:
-    image: postgres:15-alpine
+    image: postgres:13-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: example
-      POSTGRES_DB: retail_manager
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
-  pgdata:
+  postgres_data:

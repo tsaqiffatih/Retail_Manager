@@ -1,23 +1,26 @@
-
+# Base image with Node.js
 FROM node:18-alpine
 
-# Set working directory di dalam container
+# Set working directory inside the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json file
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy all source code into container
+# Copy the entire project to the container
 COPY . .
 
-# Compile TypeScript to JavaScript
+# Build the TypeScript files
 RUN npm run build
 
-# Expose port 3000
+# Expose the port your app will run on
 EXPOSE 3000
 
-# Run app
-CMD ["npm", "run", "dev"]
+# Define environment variables (override in docker-compose.yml)
+ENV NODE_ENV=production
+
+# Command to start the app
+CMD ["npm", "start"]
