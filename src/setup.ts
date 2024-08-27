@@ -17,21 +17,14 @@ import { createToken } from './helper/jsonWebToken';
 const port = 3000;
 let server: any;
 
-export const sequelizeTest = new Sequelize(
-  "postgres",
-  process.env.DB_USERNAME as string,
-  process.env.DB_PASSWORD,
-  {
-    host: "127.0.0.1",
-    dialect: "postgres",
-    logging: false,
-  }
-);
+export const sequelizeTest = new Sequelize(process.env.TEST_DATABASE_URL as string, {
+  dialect: "postgres"
+})
 
 const createTestDatabase = async () => {
   try {
-    await sequelizeTest.query("CREATE DATABASE database_test");
-    console.log("database_test created");
+    await sequelizeTest.query("CREATE DATABASE retail_manager_test");
+    console.log("retail_manager_test created");
     
   } catch (error) {
     if (error instanceof Error) {
@@ -177,7 +170,7 @@ const seedingDatabase = async () => {
 
 const deleteTestDatabase = async () => {
   try {
-    await sequelizeTest.query("DROP DATABASE IF EXISTS database_test");
+    await sequelizeTest.query("DROP DATABASE IF EXISTS retail_manager_test");
   } catch (error) {
     console.error("Error deleting database:", error);
   } 

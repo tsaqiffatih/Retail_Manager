@@ -10,11 +10,9 @@ import AuditLog from "../models/auditlog";
 dotenv.config();
 
 interface DatabaseConfig {
-  username: string;
-  password: string | undefined;
-  database: string;
-  host: string;
-  dialect: string;
+  dialect: 'postgres';
+  url: string 
+  ssl?: boolean
 }
 
 interface Config {
@@ -25,10 +23,9 @@ interface Config {
 
 // Check if required environment variables are defined
 const requiredEnvVars = [
-  "DB_USERNAME",
-  "DB_PASSWORD",
-  "DB_NAME",
-  "DB_HOST",
+  "DEV_DATABASE_URL",
+  "TEST_DATABASE_URL",
+  "PROD_DATABASE_URL"
 ];
 
 requiredEnvVars.forEach((envVar) => {
@@ -40,49 +37,36 @@ requiredEnvVars.forEach((envVar) => {
 
 const databaseConfig: Config = {
   development: {
-    username: process.env.DB_USERNAME as string,
-    password: process.env.DB_PASSWORD as string,
-    database: process.env.DB_NAME as string,
-    host: process.env.DB_HOST as string,
+    url: process.env.DEV_DATABASE_URL as string,
     dialect: "postgres",
   },
   test: {
-    username: process.env.DB_USERNAME as string,
-    password: process.env.DB_PASSWORD as string,
-    database: "database_test",
-    host: process.env.DB_HOST as string,
+    url: process.env.TEST_DATABASE_URL as string,
     dialect: "postgres",
   },
   production: {
-    username: "root",
-    password: "",
-    database: "database_production",
-    host: "127.0.0.1",
-    dialect: "mysql",
+    dialect: 'postgres',
+    url: process.env.DATABASE_URL as string,
+    ssl: true
   },
 };
 
 const env = process.env.NODE_ENV || "development";
 const config: DatabaseConfig = databaseConfig[env as keyof Config];
 
-const sequelizeConnection = new Sequelize(
-  config.database,
-  config.username,
-  config.password,
-  {
-    host: config.host,
+let sequelizeConnection: Sequelize;
+
+if (env === "production") {
+  sequelizeConnection = new Sequelize(config.url as string, {
+    dialect: 'postgres',
+    models: [User, Store, Employee, Payroll, Attendance, AuditLog],
+  });
+} else {
+  sequelizeConnection = new Sequelize(config.url as string, {
     dialect: "postgres",
     models: [User, Store, Employee, Payroll, Attendance, AuditLog],
-  }
-);
-
-sequelizeConnection.addModels([
-  User,
-  Store,
-  Employee,
-  Payroll,
-  Attendance,
-  AuditLog,
-]);
+  });
+}
 
 export default sequelizeConnection;
+
