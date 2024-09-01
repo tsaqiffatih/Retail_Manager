@@ -1,7 +1,0 @@
-setelah menjalankan docker compose up.
-buka terminal yang berbeda yang masih berada di directory aplikasi rettail manager. jalankan:
-docker compose exec app sh
-lalu setelah masuk ke terminal container app, jalankan:
-npx sequelize-cli db:migrate 
-lalu jalankan lagi
-npx sequelize-cli db:seed:all
